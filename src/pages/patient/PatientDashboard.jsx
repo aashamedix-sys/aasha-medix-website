@@ -127,81 +127,155 @@ const PatientDashboard = () => {
            </motion.div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Recent Appointments */}
-          <Card className="shadow-md border-0">
-            <CardHeader className="flex flex-row items-center justify-between border-b bg-gray-50 rounded-t-lg">
-              <CardTitle className="text-lg font-bold text-gray-800">Recent Appointments</CardTitle>
-              <Link to="/patient/appointments" className="text-sm font-medium text-green-600 hover:text-green-700 flex items-center">
-                  View All <ArrowRight className="w-4 h-4 ml-1" />
-              </Link>
-            </CardHeader>
-            <CardContent className="p-0">
-              {appointments.length > 0 ? (
-                <div className="divide-y divide-gray-100">
-                  {appointments.slice(0, 3).map((apt) => (
-                    <div key={apt.id} className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                         <div className="bg-gray-100 p-2 rounded-lg text-gray-500">
-                             {apt.service_type.includes('Telemedicine') ? <Phone className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
-                         </div>
-                         <div>
-                            <p className="font-semibold text-slate-900 text-sm">{apt.service_type}</p>
-                            <p className="text-xs text-gray-500">{new Date(apt.appointment_date).toLocaleDateString()} • {apt.appointment_time}</p>
-                         </div>
-                      </div>
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          apt.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {apt.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-gray-500">
-                    <p>No appointment history found.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        {/* Tabbed Content */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="bookings" className="flex items-center gap-2">
+              <ClipboardCheck className="w-4 h-4" />
+              My Bookings
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="flex items-center gap-2">
+              <Receipt className="w-4 h-4" />
+              Payments
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              Messages
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Reports
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Latest Reports */}
-          <Card className="shadow-md border-0">
-            <CardHeader className="flex flex-row items-center justify-between border-b bg-gray-50 rounded-t-lg">
-              <CardTitle className="text-lg font-bold text-gray-800">Latest Reports</CardTitle>
-              <Link to="/patient/reports" className="text-sm font-medium text-green-600 hover:text-green-700 flex items-center">
-                  View All <ArrowRight className="w-4 h-4 ml-1" />
-              </Link>
-            </CardHeader>
-            <CardContent className="p-0">
-              {reports.length > 0 ? (
-                <div className="divide-y divide-gray-100">
-                  {reports.slice(0, 3).map((report) => (
-                    <div key={report.id} className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="bg-green-50 p-2 rounded-lg text-green-600">
-                             <FileText className="w-5 h-5" />
-                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-900 text-sm">{report.test_name}</p>
-                          <p className="text-xs text-gray-500">{new Date(report.report_date).toLocaleDateString()}</p>
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Recent Appointments */}
+              <Card className="shadow-md border-0">
+                <CardHeader className="flex flex-row items-center justify-between border-b bg-gray-50 rounded-t-lg">
+                  <CardTitle className="text-lg font-bold text-gray-800">Recent Appointments</CardTitle>
+                  <Link to="/patient/appointments" className="text-sm font-medium text-green-600 hover:text-green-700 flex items-center">
+                      View All <ArrowRight className="w-4 h-4 ml-1" />
+                  </Link>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {appointments.length > 0 ? (
+                    <div className="divide-y divide-gray-100">
+                      {appointments.slice(0, 3).map((apt) => (
+                        <div key={apt.id} className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                             <div className="bg-gray-100 p-2 rounded-lg text-gray-500">
+                                 {apt.service_type?.includes('Telemedicine') ? <Phone className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
+                             </div>
+                             <div>
+                                <p className="font-semibold text-slate-900 text-sm">{apt.service_type}</p>
+                                <p className="text-xs text-gray-500">{new Date(apt.appointment_date).toLocaleDateString()} • {apt.appointment_time}</p>
+                             </div>
+                          </div>
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                              apt.status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {apt.status}
+                          </span>
                         </div>
-                      </div>
-                      <Link to="/patient/reports">
-                         <Button variant="outline" size="sm" className="h-8 text-xs">View</Button>
-                      </Link>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-gray-500">
-                    <p>No medical reports available yet.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                        <p>No appointment history found.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Latest Reports */}
+              <Card className="shadow-md border-0">
+                <CardHeader className="flex flex-row items-center justify-between border-b bg-gray-50 rounded-t-lg">
+                  <CardTitle className="text-lg font-bold text-gray-800">Latest Reports</CardTitle>
+                  <Link to="/patient/reports" className="text-sm font-medium text-green-600 hover:text-green-700 flex items-center">
+                      View All <ArrowRight className="w-4 h-4 ml-1" />
+                  </Link>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {reports.length > 0 ? (
+                    <div className="divide-y divide-gray-100">
+                      {reports.slice(0, 3).map((report) => (
+                        <div key={report.id} className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="bg-green-50 p-2 rounded-lg text-green-600">
+                                 <FileText className="w-5 h-5" />
+                             </div>
+                            <div>
+                              <p className="font-semibold text-slate-900 text-sm">{report.test_name}</p>
+                              <p className="text-xs text-gray-500">{new Date(report.report_date).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <Link to="/patient/reports">
+                             <Button variant="outline" size="sm" className="h-8 text-xs">View</Button>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                        <p>No medical reports available yet.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="bookings">
+            <BookingTracker userId={user?.id} />
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <PaymentDashboard userId={user?.id} />
+          </TabsContent>
+
+          <TabsContent value="messages">
+            <ChatList />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <Card className="shadow-md border-0">
+              <CardHeader className="border-b bg-gray-50">
+                <CardTitle className="text-lg font-bold text-gray-800">Medical Reports</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {reports.length > 0 ? (
+                  <div className="space-y-3">
+                    {reports.map((report) => (
+                      <div key={report.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="bg-green-50 p-3 rounded-lg text-green-600">
+                               <FileText className="w-6 h-6" />
+                           </div>
+                          <div>
+                            <p className="font-semibold text-slate-900">{report.test_name}</p>
+                            <p className="text-sm text-gray-500">{new Date(report.report_date).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">Download PDF</Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-gray-500">
+                      <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="font-medium">No medical reports available yet.</p>
+                      <p className="text-sm">Your test results will appear here</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
