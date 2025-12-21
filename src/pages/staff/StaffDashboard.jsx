@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
-import { MapPin, Video, CheckCircle, Phone, User, FlaskConical, ClipboardList, ListTodo } from 'lucide-react';
+import { MapPin, Video, CheckCircle, Phone, User, FlaskConical, ClipboardList, ListTodo, MessageSquare, CheckSquare } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import StaffBookingQueue from '@/components/StaffBookingQueue';
 import { getBookingStats } from '@/utils/staffService';
+import ApprovalQueue from '@/pages/staff/ApprovalQueue';
+import ChatList from '@/components/ChatList';
 
 const StaffDashboard = () => {
   const { userRole, user } = useAuth();
@@ -203,10 +205,18 @@ const StaffDashboard = () => {
   return (
     <DashboardLayout role="staff" title={`${userRole} Portal`}>
       <Tabs defaultValue="queue" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="queue" className="flex items-center gap-2">
             <ListTodo className="w-4 h-4" />
             Booking Queue
+          </TabsTrigger>
+          <TabsTrigger value="approvals" className="flex items-center gap-2">
+            <CheckSquare className="w-4 h-4" />
+            Approvals
+          </TabsTrigger>
+          <TabsTrigger value="messages" className="flex items-center gap-2">
+            <MessageSquare className="w-4 h-4" />
+            Messages
           </TabsTrigger>
           <TabsTrigger value="phlebotomist">
             Phlebotomist
@@ -218,6 +228,14 @@ const StaffDashboard = () => {
 
         <TabsContent value="queue" className="space-y-6">
           <StaffBookingQueue />
+        </TabsContent>
+
+        <TabsContent value="approvals" className="space-y-6">
+          <ApprovalQueue />
+        </TabsContent>
+
+        <TabsContent value="messages" className="space-y-6">
+          <ChatList />
         </TabsContent>
 
         <TabsContent value="phlebotomist">

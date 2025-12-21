@@ -3,11 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/Layouts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, FileText, Activity, Plus, Phone, ArrowRight } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, FileText, Activity, Plus, Phone, ArrowRight, Receipt, MessageSquare, ClipboardCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { motion } from 'framer-motion';
+import BookingTracker from '@/pages/BookingTracker';
+import PaymentDashboard from '@/pages/PaymentDashboard';
+import ChatList from '@/components/ChatList';
 
 const PatientDashboard = () => {
   const { user } = useAuth();
