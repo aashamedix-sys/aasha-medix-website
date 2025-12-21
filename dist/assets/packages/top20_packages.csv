@@ -1,0 +1,21 @@
+Package Code,Package Name,Includes Tests,Sample Type,Report Time,MRP
+PKG01,Basic Health Checkup,"CBC, Blood Sugar (Fasting), Urine Routine","Blood, Urine",24 hours,599
+PKG02,Diabetes Care Package,"FBS, PPBS, HbA1c, Urine Sugar","Blood, Urine",24 hours,899
+PKG03,Liver Function Test (LFT) Package,"Bilirubin Total & Direct, SGOT, SGPT, ALP, Total Protein, Albumin",Blood,24 hours,799
+PKG04,Kidney Function Test (KFT) Package,"Creatinine, Urea, Uric Acid, Sodium, Potassium",Blood,24 hours,699
+PKG05,Thyroid Profile,"T3, T4, TSH",Blood,24 hours,499
+PKG06,Lipid Profile,"Total Cholesterol, HDL, LDL, Triglycerides",Blood,24 hours,699
+PKG07,Full Body Checkup – Basic,"CBC, LFT, KFT, Lipid Profile, Blood Sugar, Urine Routine","Blood, Urine",24–48 hours,1499
+PKG08,Women Wellness Package,"CBC, Thyroid Profile, Iron Studies, Vitamin D",Blood,24–48 hours,1699
+PKG09,Senior Citizen Health Package,"CBC, LFT, KFT, Lipid Profile, Thyroid, Blood Sugar","Blood, Urine",24–48 hours,1999
+PKG10,Heart Health Package,"Lipid Profile, hsCRP",Blood,24–48 hours,1299
+PKG11,Men Wellness Package,"CBC, Lipid Profile, Liver Function, Blood Sugar",Blood,24–48 hours,1599
+PKG12,Women Hormone Profile,"FSH, LH, Prolactin, TSH",Blood,24–48 hours,1399
+PKG13,Anemia Profile,"CBC, Iron, Ferritin, Vitamin B12",Blood,24 hours,999
+PKG14,Fever Profile,"CBC, ESR, CRP, Malaria, Dengue",Blood,24 hours,1199
+PKG15,Pre-Employment Checkup,"CBC, Blood Sugar, Urine Routine, Chest X-Ray*","Blood, Urine",24–48 hours,1299
+PKG16,Executive Health Checkup,"CBC, LFT, KFT, Lipid Profile, Thyroid, Blood Sugar, Urine","Blood, Urine",48 hours,2499
+PKG17,PCOS Profile,"LH, FSH, Prolactin, TSH, Insulin",Blood,48 hours,1899
+PKG18,Vitamin Deficiency Package,"Vitamin D, Vitamin B12",Blood,48 hours,1599
+PKG19,Obesity & Metabolic Profile,"Lipid Profile, HbA1c, TSH",Blood,24–48 hours,1399
+PKG20,Pre-Marital Health Package,"CBC, Blood Group, HIV, HBsAg, VDRL",Blood,24–48 hours,1799

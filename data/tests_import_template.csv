@@ -1,0 +1,4 @@
+code,name,category,mrp,sample_type,tat,is_active,description
+CBC,Complete Blood Count,Blood,299,Blood,24 hrs,true,Basic blood panel including WBC/RBC/Platelets
+FBS,Fasting Blood Sugar,Diabetes,180,Blood,4 hrs,true,Glucose level after 8-10 hours fasting
+TSH,Thyroid Stimulating Hormone,Thyroid,299,Blood,24 hrs,true,Primary thyroid screening marker

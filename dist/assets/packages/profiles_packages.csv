@@ -1,0 +1,11 @@
+Package Code,Package Name,Includes Tests,Sample Type,Report Time,MRP
+PKG01,Basic Health Checkup,"CBC, Blood Sugar (Fasting), Urine Routine","Blood, Urine",24 hours,599
+PKG02,Diabetes Care Package,"FBS, PPBS, HbA1c, Urine Sugar","Blood, Urine",24 hours,899
+PKG03,Liver Function Test (LFT) Package,"Bilirubin Total & Direct, SGOT, SGPT, ALP, Total Protein, Albumin",Blood,24 hours,799
+PKG04,Kidney Function Test (KFT) Package,"Creatinine, Urea, Uric Acid, Sodium, Potassium",Blood,24 hours,699
+PKG05,Thyroid Profile,"T3, T4, TSH",Blood,24 hours,499
+PKG06,Lipid Profile,"Total Cholesterol, HDL, LDL, Triglycerides",Blood,24 hours,699
+PKG07,Full Body Checkup – Basic,"CBC, LFT, KFT, Lipid Profile, Blood Sugar, Urine Routine","Blood, Urine",24–48 hours,1499
+PKG08,Women Wellness Package,"CBC, Thyroid Profile, Iron Studies, Vitamin D",Blood,24–48 hours,1699
+PKG09,Senior Citizen Health Package,"CBC, LFT, KFT, Lipid Profile, Thyroid, Blood Sugar","Blood, Urine",24–48 hours,1999
+PKG10,Heart Health Package,"Lipid Profile, hsCRP",Blood,24–48 hours,1299

@@ -1,0 +1,33 @@
+Code,Test Name,Sample,Report Time,MRP
+AM01,17-alpha Hydroxy Progesterone (17-OHP),Serum (1ml),24 hours,1200
+AM02,Absolute Lymphocyte Count,WB-EDTA (3ml),8 hours,150
+AM03,Absolute Neutrophil Count,WB-EDTA (3ml),8 hours,150
+AM04,Absolute Eosinophil Count,WB-EDTA (3ml),8 hours,150
+AM09,Acid Phosphatase – Prostatic (PAP),Serum (1ml),24 hours,600
+AM10,Acid Phosphatase – Total,Serum (1ml),24 hours,275
+AM11,APTT / PTTK,Citrated Plasma (1ml),8 hours,200
+AM13,Adenosine Deaminase (ADA),Serum (1ml),24 hours,300
+AM20,ACTH,Plasma-EDTA (2ml),24 hours,1100
+AM23,ALT / SGPT,Serum (1ml),8 hours,100
+AM24,Albumin,Serum (1ml),8 hours,100
+AM30,Alkaline Phosphatase (ALP),Serum (1ml),8 hours,100
+AM36,Alpha Feto Protein (AFP),Serum (1ml),24 hours,350
+CQ43,Complete Blood Count (CBC),WB-EDTA (3ml),8 hours,40
+CQ44,Complete Blood Picture (CBP),WB-EDTA (3ml),8 hours,70
+CQ45,Complete Urine Examination,Urine (25ml),8 hours,40
+GQ04,Glucose – Fasting,Plasma-NaF (1ml),8 hours,20
+GQ05,Glucose – PP,Plasma-NaF (1ml),8 hours,20
+GQ06,Glucose – Random,Plasma-NaF (1ml),8 hours,20
+GQ09,HbA1c,WB-EDTA (3ml),24 hours,150
+HQ34,High Sensitivity CRP (hsCRP),Serum (1ml),24 hours,100
+DQ01,Vitamin D (25-OH),Serum (1ml),48 hours,1200
+FQ14,Vitamin B12,Serum (1ml),24 hours,125
+HQ36,HIV 1 & 2 Antibody,Serum (1ml),24 hours,80
+HQ48,HBsAg (Rapid),Serum (1ml),24 hours,200
+DQ06,Dengue IgG,Serum (1ml),24 hours,225
+DQ07,Dengue IgM,Serum (1ml),24 hours,225
+GQ01,GGT,Serum (1ml),8 hours,50
+BQ12,Bilirubin (Total + Direct),Serum (1ml),8 hours,75
+CQ28,HDL Cholesterol,Serum (1ml),8 hours,60
+CQ29,LDL Cholesterol,Serum (1ml),8 hours,100
+CQ30,Total Cholesterol,Serum (1ml),8 hours,40

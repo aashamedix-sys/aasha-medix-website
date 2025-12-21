@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AASHA MEDIX - Enhanced Logo & PriceList Preview</title>
+    <style>
+        /* Utility replacements for prior inline styles */
+        .logo-text-main { font-family: 'Arial', sans-serif; font-size: 22px; font-weight: bold; fill: #2A9D6F; }
+        .logo-text-sub { font-family: 'Arial', sans-serif; font-size: 10px; fill: #666666; letter-spacing: 1px; }
+        .logo-svg-root { enable-background: new 0 0 300 150; }
+        .offers-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
+        .contact-card { background: #f0fff4; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .contact-line { margin: 10px 0; }
+        .footer-note { margin-top: 15px; font-size: 0.9em; opacity: 0.9; }
+        .footer-links { margin-top: 10px; font-size: 0.85em; }
+        .footer-link { color: white; text-decoration: underline; }
+        .footer-cta { margin-top: 20px; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            color: #2a9d6f;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .logo-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .logo-preview svg {
+            width: 90%;
+            height: auto;
+            max-width: 400px;
+        }
+
+        .features {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .features li:last-child {
+            border-bottom: none;
+        }
+
+        .features li::before {
+            content: "✓";
+            color: #2a9d6f;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #2a9d6f;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2a9d6f;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #2a9d6f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e7a52;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: #e30011;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #c40010;
+            transform: scale(1.05);
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .category-badge {
+            background: #f0f7ff;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            border: 2px solid #e0eeff;
+            font-size: 0.9em;
+        }
+
+        .category-badge:hover {
+            background: #e0eeff;
+            border-color: #2a9d6f;
+        }
+
+        .packages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .package-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .package-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .package-price {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .package-save {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #2a9d6f;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin: 5px 5px 5px 0;
+        }
+
+        .quality-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .quality-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .quality-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .quality-item-emoji {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .quality-item-text {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+            margin-top: 40px;
+            border-top: 2px solid rgba(255,255,255,0.2);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .float-icon {
+            animation: float 3s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        .price-info {
+            background: #f0fff4;
+            border-left: 4px solid #2a9d6f;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .price-info strong {
+            color: #2a9d6f;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1><span class="float-icon">🏥</span> AASHA MEDIX</h1>
+            <p>Enhanced Logo & Comprehensive PriceList Preview</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="preview-grid">
+            <!-- Card 1: Enhanced Logo -->
+            <div class="card">
+                <h2>🎨 Enhanced Logo</h2>
+                <div class="logo-preview">
+                    <svg version="1.1" id="Layer_1" class="logo-svg-root" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                         viewBox="0 0 300 150" xml:space="preserve">
+                        <defs>
+                            <style type="text/css">
+                                .st0{fill:#2A9D6F;}
+                                .st1{fill:#E30011;}
+                                .medical-bg{fill:#FFFFFF;filter:drop-shadow(0 4px 12px rgba(42,157,111,0.2));}
+                                .st4{fill:none;stroke:#E30011;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:4,2;}
+                                @keyframes float-logo{ 0%, 100% {transform: translateY(0px); } 50% {transform: translateY(-10px); } }
+                                @keyframes heartbeat{ 0%, 100% {r: 3.5px; } 25% {r: 4.5px; } 50% {r: 3.5px; } }
+                                .logo-container{animation: float-logo 3s ease-in-out infinite;filter: drop-shadow(0 4px 12px rgba(42,157,111,0.15));}
+                                .heart-pulse{animation: heartbeat 1.2s ease-in-out infinite;}
+                            </style>
+                        </defs>
+                        <rect class="medical-bg" x="5" y="5" width="290" height="140" rx="10" ry="10"/>
+                        <g class="logo-container">
+                            <rect class="st0" x="28" y="15" width="6" height="36" rx="3"/>
+                            <rect class="st0" x="16" y="27" width="36" height="6" rx="3"/>
+                            <g class="st4">
+                                <polyline points="70,45 80,45 85,35 95,50 100,45 110,45"/>
+                            </g>
+                            <circle class="heart-pulse" cx="25" cy="50" r="3.5" fill="#E30011"/>
+                            <circle cx="60" cy="40" r="2" fill="#2A9D6F" opacity="0.7"/>
+                            <circle cx="110" cy="50" r="2" fill="#2A9D6F" opacity="0.7"/>
+                        </g>
+                        <text x="130" y="48" class="logo-text-main">AASHA MEDIX</text>
+                        <text x="130" y="64" class="logo-text-sub">HEALTHCARE FOR ALL</text>
+                    </svg>
+                </div>
+                <h3>Features</h3>
+                <ul class="features">
+                    <li>Live heartbeat animation</li>
+                    <li>Medical cross icon with depth</li>
+                    <li>Float animation on scroll</li>
+                    <li>Responsive SVG format</li>
+                    <li>Healthcare color scheme</li>
+                </ul>
+            </div>
+
+            <!-- Card 2: PriceList Overview -->
+            <div class="card">
+                <h2>💰 50 Routine Tests</h2>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number">50</div>
+                        <div class="stat-label">Tests</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">₹150</div>
+                        <div class="stat-label">Starting from</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">10</div>
+                        <div class="stat-label">Packages</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">7</div>
+                        <div class="stat-label">Categories</div>
+                    </div>
+                </div>
+
+                <h3>Test Categories</h3>
+                <div class="categories">
+                    <div class="category-badge">🩸 Blood Tests</div>
+                    <div class="category-badge">🧪 Biochemistry</div>
+                    <div class="category-badge">🧬 Thyroid</div>
+                    <div class="category-badge">💊 Nutrition</div>
+                    <div class="category-badge">🦴 Bone</div>
+                    <div class="category-badge">🔬 Urine</div>
+                    <div class="category-badge">🦠 Immune</div>
+                </div>
+
+                <div class="cta-buttons">
+                    <a href="http://localhost:3002/pricelist" class="btn btn-primary">View Full PriceList</a>
+                    <a href="http://localhost:3002/book-tests" class="btn btn-secondary">Book Now</a>
+                </div>
+            </div>
+
+            <!-- Card 3: Popular Packages -->
+            <div class="card">
+                <h2>📦 Health Packages</h2>
+                <div class="packages">
+                    <div class="package-item">
+                        <div class="package-name">Basic Checkup</div>
+                        <div class="package-price">₹1,299</div>
+                        <div class="package-save">Save ₹450</div>
+                    </div>
+                    <div class="package-item">
+                        <div class="package-name">Comprehensive</div>
+                        <div class="package-price">₹2,199</div>
+                        <div class="package-save">Save ₹699</div>
+                    </div>
+                    <div class="package-item">
+                        <div class="package-name">Diabetes Panel</div>
+                        <div class="package-price">₹1,699</div>
+                        <div class="package-save">Save ₹550</div>
+                    </div>
+                    <div class="package-item">
+                        <div class="package-name">Thyroid Check</div>
+                        <div class="package-price">₹1,999</div>
+                        <div class="package-save">Save ₹449</div>
+                    </div>
+                    <div class="package-item">
+                        <div class="package-name">Cardiac Risk</div>
+                        <div class="package-price">₹1,799</div>
+                        <div class="package-save">Save ₹600</div>
+                    </div>
+                    <div class="package-item">
+                        <div class="package-name">Senior Checkup</div>
+                        <div class="package-price">₹2,899</div>
+                        <div class="package-save">Save ₹1,050</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Quality & Services -->
+            <div class="card">
+                <h2>✅ Quality & Services</h2>
+                
+                <div class="quality-section">
+                    <strong>Laboratory Certifications</strong>
+                    <div class="quality-grid">
+                        <div class="quality-item">
+                            <div class="quality-item-emoji">🏆</div>
+                            <div class="quality-item-text">NABL Accredited</div>
+                        </div>
+                        <div class="quality-item">
+                            <div class="quality-item-emoji">✓</div>
+                            <div class="quality-item-text">ISO 15189:2022</div>
+                        </div>
+                        <div class="quality-item">
+                            <div class="quality-item-emoji">🔬</div>
+                            <div class="quality-item-text">CAP Certified</div>
+                        </div>
+                        <div class="quality-item">
+                            <div class="quality-item-emoji">📋</div>
+                            <div class="quality-item-text">AACB Certified</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Services Included</h3>
+                <ul class="features">
+                    <li>Free home sample collection</li>
+                    <li>Digital reports in 24 hours</li>
+                    <li>Express reports available</li>
+                    <li>Expert pathologist consultation</li>
+                    <li>Quality control verified tests</li>
+                </ul>
+            </div>
+
+            <!-- Card 5: Pricing Strategy -->
+            <div class="card">
+                <h2>💳 Pricing & Discounts</h2>
+                
+                <div class="price-info">
+                    <strong>Price Range:</strong> ₹150 to ₹1,299 per test
+                </div>
+
+                <h3>Special Offers</h3>
+                <div class="offers-row">
+                    <span class="badge">5% Online Prepaid</span>
+                    <span class="badge">8% Senior Citizens</span>
+                    <span class="badge">10% Students</span>
+                    <span class="badge">10-15% Corporate</span>
+                    <span class="badge">₹200 Referral</span>
+                    <span class="badge">10% Loyalty</span>
+                </div>
+
+                <h3>Payment Methods</h3>
+                <ul class="features">
+                    <li>Credit/Debit Card</li>
+                    <li>Online Banking</li>
+                    <li>Wallets & UPI</li>
+                    <li>Cash on Delivery (optional)</li>
+                    <li>Corporate Accounts</li>
+                </ul>
+            </div>
+
+            <!-- Card 6: Contact & Support -->
+            <div class="card">
+                <h2>📞 Contact & Support</h2>
+                <div class="contact-card">
+                    <p class="contact-line"><strong>📱 Phone:</strong> 1800-123-AASHA (2274)</p>
+                    <p class="contact-line"><strong>💬 WhatsApp:</strong> 9876543210</p>
+                    <p class="contact-line"><strong>📧 Email:</strong> support@aashamedix.com</p>
+                    <p class="contact-line"><strong>🕐 Hours:</strong> 6 AM - 10 PM (7 days)</p>
+                </div>
+
+                <h3>Available Platforms</h3>
+                <ul class="features">
+                    <li>Website (www.aashamedix.com)</li>
+                    <li>Mobile App (iOS & Android)</li>
+                    <li>24/7 Customer Support</li>
+                    <li>Video Consultations</li>
+                    <li>Home Sample Collection</li>
+                </ul>
+
+                <div class="cta-buttons footer-cta">
+                    <a href="tel:18001234274" class="btn btn-primary">Call Now</a>
+                    <a href="http://localhost:3002/contact" class="btn btn-secondary">Contact Us</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>🎉 <strong>AASHA MEDIX - Healthcare for All</strong></p>
+            <p>Enhanced Logo & 50 Routine Tests Pricelist | Version 1.0</p>
+            <p class="footer-note">
+                Created: December 21, 2025 | Status: ✅ Production Ready
+            </p>
+            <p class="footer-links">
+                <a href="http://localhost:3002/pricelist" class="footer-link">🔗 View Interactive PriceList</a> | 
+                <a href="http://localhost:3002/" class="footer-link">🏠 Home Page</a>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

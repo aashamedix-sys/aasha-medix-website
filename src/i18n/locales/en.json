@@ -1,0 +1,126 @@
+{
+  "header": {
+    "home": "Home",
+    "services": "Services",
+    "priceList": "Price List",
+    "about": "About",
+    "contact": "Contact",
+    "patient": "Patient",
+    "staff": "Staff",
+    "admin": "Admin"
+  },
+  "hero": {
+    "badge": "Your Trusted Healthcare Partner",
+    "heading": "Complete Healthcare At Your Doorstep",
+    "subheading": "Diagnosis, Doctor, Delivery",
+    "subheadingPrimary": "Diagnosis",
+    "subheadingSecondary": "Doctor",
+    "subheadingTertiary": "Delivery",
+    "bookSample": "Book Home Sample",
+    "consultDoctor": "Consult Doctor",
+    "trustedBy": "Trusted by 5,000+ families across Telangana"
+  },
+  "services": {
+    "title": "Our Services",
+    "homeCollection": {
+      "name": "Home Sample Collection",
+      "desc": "NABL-certified lab technicians collect samples at your home"
+    },
+    "diagnostics": {
+      "name": "Diagnostic Tests",
+      "desc": "280+ tests with accurate results in 24-48 hours"
+    },
+    "telemedicine": {
+      "name": "Telemedicine Consultation",
+      "desc": "Consult experienced doctors online, anytime, anywhere"
+    },
+    "medicines": {
+      "name": "Medicine Delivery",
+      "desc": "Prescribed medicines delivered to your home safely"
+    },
+    "healthPackages": {
+      "name": "Health Packages",
+      "desc": "Comprehensive checkup packages for wellness tracking"
+    },
+    "emergency": {
+      "name": "Emergency Care",
+      "desc": "24/7 ambulance and emergency medical support"
+    },
+    "learnMore": "Learn More"
+  },
+  "testimonials": {
+    "title": "What Families Say",
+    "subtitle": "Real stories from real patients across Telangana"
+  },
+  "footer": {
+    "supportingFamilies": "Supporting families and elders with safe, reliable healthcare",
+    "builtWithCare": "Built with care for healthier families",
+    "services": "Services",
+    "company": "Company",
+    "getInTouch": "Get in Touch",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address"
+  },
+  "trust": {
+    "nabl": "NABL-aligned Lab",
+    "homeCollection": "Home Collection",
+    "trustedFamilies": "Trusted by Families",
+    "secureReports": "Secure Reports"
+  },
+  "common": {
+    "bookTest": "Book Test",
+    "orderMeds": "Order Meds",
+    "chat": "Ask AASHA DOST",
+    "aiHelper": "AI helper"
+  }
+  ,
+  "bookDoctor": {
+    "title": "Expert Doctors",
+    "subtitle": "Book consultations with top specialists",
+    "searchPlaceholder": "Search doctors, specialties...",
+    "tabs": { "all": "All" },
+    "noDoctors": {
+      "title": "No doctors found",
+      "desc": "Currently loading our doctor network. Please use WhatsApp or call us to book a consultation."
+    },
+    "countLabel": "{{count}} doctors",
+    "upcoming": {
+      "title": "Upcoming doctors in {{specialty}} will be listed here.",
+      "desc": "Contact us to schedule with our partner specialists."
+    },
+    "labels": {
+      "experience": "Experience",
+      "fee": "Consultation Fee",
+      "viewProfile": "View Profile",
+      "bookNow": "Book Now",
+      "whatsapp": "WhatsApp Us",
+      "callNow": "Call Now"
+    }
+    ,
+    "booking": {
+      "itemName": "Consultation with {{name}}"
+    }
+    ,
+    "extras": {
+      "reviewsCount": "({{count}}+ Reviews)",
+      "defaultExperienceYears": "10+ Years"
+    }
+  },
+  "specialties": {
+    "General Physician": "General Physician",
+    "Pediatrics": "Pediatrics",
+    "Gynecology": "Gynecology",
+    "Orthopedics": "Orthopedics",
+    "Cardiology": "Cardiology",
+    "Dermatology": "Dermatology",
+    "ENT": "ENT",
+    "Neurology": "Neurology",
+    "Nephrology": "Nephrology",
+    "Pulmonology": "Pulmonology",
+    "Oncology": "Oncology",
+    "Psychiatry": "Psychiatry",
+    "Ophthalmology": "Ophthalmology",
+    "Dental": "Dental"
+  }
+}

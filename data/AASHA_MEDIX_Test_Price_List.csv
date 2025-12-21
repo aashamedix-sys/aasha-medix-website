@@ -1,0 +1,21 @@
+Code,Test Name,Sample,TAT,MRP
+AM01,17-alpha Hydroxy Progesterone (17-OHP),Serum (1ml),24 hours,1200
+AM02,Absolute Lymphocyte Count,WB-EDTA (3ml),8 hours,150
+AM03,Absolute Neutrophil Count,WB-EDTA (3ml),8 hours,150
+AM04,Absolute Eosinophil Count,WB-EDTA (3ml),8 hours,150
+AM09,Acid Phosphatase - Prostatic (PAP),Serum (1ml),24 hours,600
+AM10,Acid Phosphatase - Total,Serum (1ml),24 hours,275
+AM11,Activated Partial Thromboplastin Time (APTT),Citrated Plasma (1ml),8 hours,200
+AM13,Adenosine Deaminase (ADA),Serum (1ml),24 hours,300
+AM20,ACTH,Plasma-EDTA (2ml),24 hours,1100
+AM23,ALT / SGPT,Serum (1ml),8 hours,100
+AM24,Albumin,Serum (1ml),8 hours,100
+AM30,Alkaline Phosphatase (ALP),Serum (1ml),8 hours,100
+AM36,Alpha Feto Protein (AFP),Serum (1ml),24 hours,350
+CQ43,Complete Blood Count (CBC),WB-EDTA (3ml),8 hours,40
+CQ45,Complete Urine Examination,Urine (25ml),8 hours,40
+GQ04,Glucose Fasting,Plasma-NaF (1ml),8 hours,20
+GQ06,Glucose Random,Plasma-NaF (1ml),8 hours,20
+GQ09,HbA1c,WB-EDTA (3ml),24 hours,150
+HQ34,High Sensitivity CRP,Serum (1ml),24 hours,100
+DQ01,Vitamin D (25-OH),Serum (1ml),48 hours,1200

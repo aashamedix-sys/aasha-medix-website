@@ -1,0 +1,3 @@
+code,name,mrp,tests_included,description,is_active
+BASIC01,Basic Health Package,999,"CBC,FBS,TSH",Starter package for routine screening,true
+DIAB01,Diabetes Profile,1499,"FBS,PPBS,HbA1c",Comprehensive diabetes risk assessment,true
