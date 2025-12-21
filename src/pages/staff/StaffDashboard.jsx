@@ -1,39 +1,58 @@
 
 import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/Layouts';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
-import { MapPin, Video, CheckCircle, Phone, User, FlaskConical, ClipboardList } from 'lucide-react';
+import { MapPin, Video, CheckCircle, Phone, User, FlaskConical, ClipboardList, ListTodo } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import StaffBookingQueue from '@/components/StaffBookingQueue';
+import { getBookingStats } from '@/utils/staffService';
 
 const StaffDashboard = () => {
-  const { userRole } = useAuth();
+  const { userRole, user } = useAuth();
   const [appointments, setAppointments] = useState([]);
+  const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-        setLoading(true);
-        // Fetch appointments with patient details
-        const { data, error } = await supabase
-            .from('appointments')
-            .select('*, patients(name, mobile, address)')
-            .order('appointment_date', { ascending: true });
-        
-        if (data) setAppointments(data);
-        setLoading(false);
+      setLoading(true);
+      
+      // Fetch appointments with patient details
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*, patients(name, mobile, address)')
+        .order('appointment_date', { ascending: true });
+      
+      if (data) setAppointments(data);
+
+      // Fetch booking statistics
+      const bookingStats = await getBookingStats();
+      setStats(bookingStats);
+
+      setLoading(false);
     };
     fetchData();
   }, []);
 
   const handleStatusChange = async (id, newStatus) => {
-      const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id);
-      if (!error) {
-          toast({ title: "Status Updated", description: `Appointment marked as ${newStatus}` });
-          setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
-      }
+    const { error } = await supabase
+      .from('appointments')
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (!error) {
+      toast({ 
+        title: "Status Updated", 
+        description: `Appointment marked as ${newStatus}` 
+      });
+      setAppointments(prev => 
+        prev.map(a => a.id === id ? { ...a, status: newStatus } : a)
+      );
+    }
   };
 
   const renderPhlebotomistView = () => (
@@ -183,20 +202,32 @@ const StaffDashboard = () => {
 
   return (
     <DashboardLayout role="staff" title={`${userRole} Portal`}>
-        {userRole === 'Phlebotomist' && renderPhlebotomistView()}
-        {userRole === 'Doctor' && renderDoctorView()}
-        {(userRole === 'Technician' || userRole === 'Lab Technician') && renderLabTechView()}
-        
-        {/* Fallback for other roles or undetermined role */}
-        {!['Phlebotomist', 'Doctor', 'Technician', 'Lab Technician', 'Admin'].includes(userRole) && (
-             <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="bg-gray-100 p-6 rounded-full mb-4">
-                    <User className="w-12 h-12 text-gray-400" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800">Welcome, Staff Member</h2>
-                <p className="text-gray-500 mt-2 max-w-md">Your specific role dashboard is being configured. Please contact the administrator if you believe this is an error.</p>
-            </div>
-        )}
+      <Tabs defaultValue="queue" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="queue" className="flex items-center gap-2">
+            <ListTodo className="w-4 h-4" />
+            Booking Queue
+          </TabsTrigger>
+          <TabsTrigger value="phlebotomist">
+            Phlebotomist
+          </TabsTrigger>
+          <TabsTrigger value="tech">
+            Lab Tech
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="queue" className="space-y-6">
+          <StaffBookingQueue />
+        </TabsContent>
+
+        <TabsContent value="phlebotomist">
+          {renderPhlebotomistView()}
+        </TabsContent>
+
+        <TabsContent value="tech">
+          {renderLabTechView()}
+        </TabsContent>
+      </Tabs>
     </DashboardLayout>
   );
 };

@@ -6,13 +6,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Calendar, Clock, MapPin, User, Mail, Phone } from 'lucide-react';
+import { Loader2, Calendar, Clock, MapPin, User, Mail, Phone, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { generateReferenceNumber } from '@/utils/notificationService';
 import { createBooking } from '@/utils/bookingService';
+import PaymentCheckout from '@/components/PaymentCheckout';
 
 const BookingDetails = ({ 
   type = 'test', 
@@ -24,6 +25,8 @@ const BookingDetails = ({
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [step, setStep] = useState('details'); // 'details' | 'payment' | 'confirmation'
+  const [createdBooking, setCreatedBooking] = useState(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -90,8 +93,9 @@ const BookingDetails = ({
         notes: formData.instructions,
         
         total_amount: totalAmount,
-        status: 'Confirmed',
+        status: 'Payment Pending',
         reference_number: refNum,
+        payment_status: 'pending',
         
         // Specific IDs
         test_ids: type === 'test' ? items.map(i => i.id) : null,
@@ -103,14 +107,17 @@ const BookingDetails = ({
       const { success, booking } = await createBooking(payload);
 
       if (success) {
-        toast({ title: "Booking Confirmed!", description: `Reference: ${refNum}` });
-        
-        navigate('/booking-confirmation', {
-          state: {
-            booking: { ...payload, id: booking.id, items },
-            refNum
-          }
+        setCreatedBooking({
+          ...booking,
+          fullName: formData.fullName,
+          email: formData.email,
+          mobile: formData.mobile,
+          items
         });
+        
+        // Move to payment step
+        setStep('payment');
+        toast({ title: "Booking Created", description: "Proceed to payment" });
       }
 
     } catch (error) {
@@ -121,13 +128,64 @@ const BookingDetails = ({
     }
   };
 
+  const handlePaymentSuccess = (paidBooking) => {
+    navigate('/booking-confirmation', {
+      state: {
+        booking: { ...createdBooking, ...paidBooking },
+        refNum: createdBooking.reference_number
+      }
+    });
+  };
+
+  const handlePaymentFailure = () => {
+    toast({
+      title: "Payment Failed",
+      description: "Please try again or contact support",
+      variant: "destructive"
+    });
+    setStep('payment');
+  };
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
   };
 
+  // Show payment checkout
+  if (step === 'payment' && createdBooking) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <PaymentCheckout
+          booking={{
+            ...createdBooking,
+            id: createdBooking.id,
+            total_amount: totalAmount
+          }}
+          onPaymentSuccess={handlePaymentSuccess}
+          onPaymentFailure={handlePaymentFailure}
+        />
+      </div>
+    );
+  }
+
+  // Show booking details form
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
+      {/* Step Indicator */}
+      <div className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-4 flex-1">
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white ${step === 'details' ? 'bg-[#00A86B]' : 'bg-gray-300'}`}>
+            1
+          </div>
+          <span className="text-sm font-semibold text-[#1F1F1F]">Details</span>
+          <div className={`flex-1 h-1 ${step === 'details' ? 'bg-gray-300' : 'bg-[#00A86B]'}`}></div>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white ${step === 'payment' ? 'bg-[#00A86B]' : 'bg-gray-300'}`}>
+            2
+          </div>
+          <span className="text-sm font-semibold text-[#1F1F1F]">Payment</span>
+        </div>
+      </div>
+
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
           <Card>
@@ -253,8 +311,8 @@ const BookingDetails = ({
 
           <div className="flex gap-4 pt-4">
             <Button variant="outline" className="w-1/3" onClick={onBack}>Back</Button>
-            <Button className="w-2/3 bg-green-600 hover:bg-green-700" onClick={handleSubmit} disabled={loading}>
-              {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Confirming...</> : 'Confirm Booking'}
+            <Button className="w-2/3 bg-[#00A86B] hover:bg-[#1B7F56] text-white" onClick={handleSubmit} disabled={loading}>
+              {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating...</> : <>Continue to Payment <ChevronRight className="w-4 h-4 ml-2" /></>}
             </Button>
           </div>
         </div>
