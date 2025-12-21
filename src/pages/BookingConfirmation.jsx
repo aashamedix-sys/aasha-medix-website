@@ -1,104 +1,216 @@
 
-import React, { useState } from 'react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle, Calendar, MapPin, Download, Home, ArrowRight, Loader2 } from 'lucide-react';
+import { CheckCircle, Phone, Copy, MapPin, Calendar, Clock, FileText } from 'lucide-react';
 import { Helmet } from 'react-helmet';
+import { toast } from '@/components/ui/use-toast';
+import { motion } from 'framer-motion';
 
 const BookingConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const stateBooking = location.state?.booking;
-  const stateRefNum = location.state?.refNum;
+  const [copied, setCopied] = useState(false);
   
-  const [booking, setBooking] = useState(stateBooking || null);
-  const [loading, setLoading] = useState(false);
+  const bookingData = location.state?.booking;
+  const refNum = location.state?.refNum;
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-green-600"/></div>;
+  useEffect(() => {
+    if (!bookingData) {
+      navigate('/');
+      return;
+    }
+  }, [bookingData, navigate]);
 
-  if (!booking) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">No Booking Found</h2>
-        <p className="text-gray-500 mb-6">It looks like you haven't made a booking yet or the session expired.</p>
-        <Link to="/">
-          <Button>Back to Home</Button>
-        </Link>
-      </div>
-    );
-  }
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (!bookingData) return null;
+
+  const getTypeLabel = (type) => {
+    switch(type) {
+      case 'test': return 'Diagnostic Test';
+      case 'doctor': return 'Doctor Consultation';
+      case 'medicine': return 'Medicine Order';
+      default: return 'Booking';
+    }
+  };
+
+  const getNextSteps = (type) => {
+    switch(type) {
+      case 'test':
+        return [
+          { icon: Phone, title: 'We\'ll call you within 1 hour', desc: 'To confirm collection time' },
+          { icon: MapPin, title: 'Sample collection at home', desc: 'By certified phlebotomist' },
+          { icon: FileText, title: 'Reports within 24 hours', desc: 'Sent to your registered email' }
+        ];
+      case 'doctor':
+        return [
+          { icon: Phone, title: 'Doctor assignment', desc: 'Based on your specialty choice' },
+          { icon: Clock, title: 'Consultation slot', desc: 'Online or in-person as selected' },
+          { icon: FileText, title: 'Prescription & follow-up', desc: 'Shared via app and email' }
+        ];
+      case 'medicine':
+        return [
+          { icon: Phone, title: 'Order confirmation call', desc: 'We\'ll verify your order' },
+          { icon: MapPin, title: 'Home delivery', desc: 'With licensed pharmacist' },
+          { icon: FileText, title: 'Billing receipt', desc: 'Sent to your email' }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const steps = getNextSteps(bookingData.booking_type);
 
   return (
     <>
-      <Helmet><title>Booking Confirmed - AASHA MEDIX</title></Helmet>
-      <div className="min-h-screen bg-gray-50 pt-28 pb-20 px-4">
-        <Card className="max-w-2xl mx-auto border-t-4 border-t-green-500 shadow-xl">
-          <CardContent className="p-8 text-center space-y-6">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-in zoom-in duration-300">
-              <CheckCircle className="w-10 h-10 text-green-600" />
-            </div>
-            
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Booking Confirmed!</h1>
-              <p className="text-gray-500">Thank you for choosing AASHA MEDIX.</p>
-              <div className="mt-4 inline-block bg-gray-100 px-4 py-2 rounded-lg border border-gray-200">
-                <span className="text-sm text-gray-500">Reference ID:</span>
-                <span className="ml-2 font-mono font-bold text-gray-900 tracking-wide">{booking.reference_number || stateRefNum}</span>
-              </div>
-            </div>
+      <Helmet>
+        <title>Booking Confirmed - AASHA MEDIX</title>
+        <meta name="description" content="Your booking has been confirmed. Track your appointment." />
+      </Helmet>
 
-            <div className="grid md:grid-cols-2 gap-4 text-left bg-gray-50 p-6 rounded-xl border border-gray-100">
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Service Type</p>
-                <p className="font-medium text-gray-900 capitalize">{booking.booking_type} Service</p>
+      <div className="min-h-screen bg-gradient-to-b from-[#E6F5F0] to-white py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto">
+          
+          {/* Success Message */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="text-center mb-8"
+          >
+            <div className="flex justify-center mb-4">
+              <div className="w-20 h-20 rounded-full bg-[#00A86B]/20 flex items-center justify-center">
+                <CheckCircle className="w-12 h-12 text-[#00A86B]" />
               </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Status</p>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  Confirmed
-                </span>
+            </div>
+            <h1 className="text-4xl font-bold text-[#1F1F1F] mb-2">Booking Confirmed!</h1>
+            <p className="text-[#6B7280] text-lg">Your {getTypeLabel(bookingData.booking_type).toLowerCase()} is scheduled</p>
+          </motion.div>
+
+          {/* Reference Number Card */}
+          <Card className="mb-6 border-2 border-[#00A86B]/30 bg-white shadow-lg rounded-2xl">
+            <CardHeader className="bg-gradient-to-r from-[#00A86B]/10 to-[#E6F5F0] rounded-t-2xl">
+              <CardTitle className="text-center text-[#00A86B]">Your Reference Number</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-8">
+              <div className="flex items-center justify-between gap-4 p-4 bg-[#F9FAFB] rounded-xl border border-[#E5E7EB]">
+                <div>
+                  <p className="text-sm text-[#6B7280] mb-1">Reference</p>
+                  <p className="text-3xl font-bold text-[#1F1F1F] font-mono">{refNum}</p>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(refNum)}
+                  className="p-3 hover:bg-[#E6F5F0] rounded-lg transition-colors"
+                  title="Copy reference number"
+                >
+                  <Copy className="w-5 h-5 text-[#00A86B]" />
+                </button>
               </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Date & Time</p>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-medium">{booking.appointment_date} at {booking.appointment_time}</span>
+              {copied && <p className="text-sm text-[#00A86B] mt-2 text-center font-medium">Copied!</p>}
+            </CardContent>
+          </Card>
+
+          {/* Booking Details */}
+          <Card className="mb-6 rounded-2xl shadow-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <FileText className="w-5 h-5 text-[#00A86B]" />
+                Booking Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-[#6B7280] mb-1">Service Type</p>
+                  <p className="font-semibold text-[#1F1F1F]">{getTypeLabel(bookingData.booking_type)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-[#6B7280] mb-1">Status</p>
+                  <p className="font-semibold text-[#00A86B]">{bookingData.status}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-[#6B7280] mb-1">Appointment Date</p>
+                  <p className="font-semibold text-[#1F1F1F]">{new Date(bookingData.appointment_date).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-[#6B7280] mb-1">Preferred Time</p>
+                  <p className="font-semibold text-[#1F1F1F]">{bookingData.appointment_time}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <p className="text-sm text-[#6B7280] mb-1">Delivery / Collection Address</p>
+                  <p className="font-semibold text-[#1F1F1F]">{bookingData.address}</p>
                 </div>
               </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Location</p>
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
-                  <span className="text-sm font-medium truncate w-full">{booking.address || booking.collection_address}</span>
+            </CardContent>
+          </Card>
+
+          {/* Next Steps */}
+          <Card className="mb-6 rounded-2xl shadow-md">
+            <CardHeader>
+              <CardTitle className="text-xl">What Happens Next</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {steps.map((step, idx) => {
+                  const Icon = step.icon;
+                  return (
+                    <div key={idx} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-[#E6F5F0] border-2 border-[#00A86B] flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-5 h-5 text-[#00A86B]" />
+                        </div>
+                        {idx < steps.length - 1 && (
+                          <div className="w-0.5 h-12 bg-[#E6F5F0] mt-2"></div>
+                        )}
+                      </div>
+                      <div className="pb-4 pt-1">
+                        <p className="font-semibold text-[#1F1F1F]">{step.title}</p>
+                        <p className="text-sm text-[#6B7280]">{step.desc}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Support & Action Buttons */}
+          <Card className="mb-6 rounded-2xl shadow-md bg-[#FEF3F2] border border-[#FEE4E2]">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Phone className="w-5 h-5 text-[#E63946]" />
+                <div>
+                  <p className="font-semibold text-[#1F1F1F]">Need help?</p>
+                  <p className="text-sm text-[#6B7280]">Call us: <span className="font-semibold">1800-AASHA-1</span></p>
                 </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="space-y-4 pt-4">
-              <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-100">
-                You will receive a confirmation SMS and Email shortly. <br/>
-                Our representative will contact you prior to arrival.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                <Link to="/booking-tracker">
-                   <Button variant="outline" className="w-full sm:w-auto hover:bg-gray-50">
-                     <ArrowRight className="w-4 h-4 mr-2" /> Track Booking
-                   </Button>
-                </Link>
-                <Button variant="outline" className="w-full sm:w-auto hover:bg-gray-50" onClick={() => window.print()}>
-                  <Download className="w-4 h-4 mr-2" /> Download Receipt
-                </Button>
-                <Link to="/">
-                   <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 shadow-md">
-                     <Home className="w-4 h-4 mr-2" /> Back to Home
-                   </Button>
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button
+              onClick={() => navigate('/booking-tracker')}
+              className="w-full sm:flex-1 h-12 bg-[#00A86B] hover:bg-[#1B7F56] text-white font-semibold rounded-xl"
+            >
+              Track Booking
+            </Button>
+            <Button
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="w-full sm:flex-1 h-12 border-2 border-[#00A86B] text-[#00A86B] hover:bg-[#E6F5F0] font-semibold rounded-xl"
+            >
+              Back to Home
+            </Button>
+          </div>
+
+        </div>
       </div>
     </>
   );

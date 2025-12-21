@@ -12,6 +12,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { generateReferenceNumber } from '@/utils/notificationService';
+import { createBooking } from '@/utils/bookingService';
 
 const BookingDetails = ({ 
   type = 'test', 
@@ -98,21 +99,19 @@ const BookingDetails = ({
         doctor_id: type === 'doctor' ? items[0]?.id : null
       };
 
-      const { data, error } = await supabase.from('bookings').insert([payload]).select();
+      // Use new booking service that integrates with Make.com webhook
+      const { success, booking } = await createBooking(payload);
 
-      if (error) {
-        console.error("Booking Insert Error:", error);
-        throw new Error(error.message || "Database insert failed");
+      if (success) {
+        toast({ title: "Booking Confirmed!", description: `Reference: ${refNum}` });
+        
+        navigate('/booking-confirmation', {
+          state: {
+            booking: { ...payload, id: booking.id, items },
+            refNum
+          }
+        });
       }
-
-      toast({ title: "Booking Confirmed!", description: `Reference: ${refNum}` });
-      
-      navigate('/booking-confirmation', {
-        state: {
-          booking: { ...payload, id: data[0].id, items },
-          refNum
-        }
-      });
 
     } catch (error) {
       console.error(error);
