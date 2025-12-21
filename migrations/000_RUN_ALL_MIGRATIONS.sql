@@ -4,8 +4,143 @@
 -- Run this entire script in Supabase SQL Editor
 -- ======================================
 
--- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ======================================
+-- CORE TABLE: BOOKINGS
+-- Create the main bookings table first (required by all other tables)
+-- ======================================
+
+CREATE TABLE IF NOT EXISTS bookings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  patient_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  reference_number VARCHAR(50) UNIQUE NOT NULL,
+  booking_type VARCHAR(50) NOT NULL,
+  status VARCHAR(50) DEFAULT 'Payment Pending',
+  
+  -- Appointment details
+  appointment_date DATE NOT NULL,
+  appointment_time TIME NOT NULL,
+  booking_date TIMESTAMP DEFAULT now(),
+  
+  -- Patient contact info
+  mobile VARCHAR(15),
+  email VARCHAR(255),
+  address TEXT,
+  
+  -- Service-specific IDs
+  test_ids UUID[],
+  medicine_ids JSONB,
+  doctor_id UUID,
+  
+  -- Payment details
+  total_amount DECIMAL(10, 2) DEFAULT 0,
+  payment_status VARCHAR(20) DEFAULT 'pending',
+  
+  -- Notes
+  notes TEXT,
+  special_notes TEXT,
+  staff_notes TEXT,
+  
+  -- Timestamps
+  created_at TIMESTAMP DEFAULT now(),
+  updated_at TIMESTAMP DEFAULT now(),
+  
+  -- Additional fields (will be added/modified by migrations below)
+  approved_at TIMESTAMP,
+  approved_by UUID REFERENCES auth.users(id),
+  rejected_at TIMESTAMP,
+  rejected_by UUID REFERENCES auth.users(id),
+  rejection_reason TEXT,
+  rescheduled_at TIMESTAMP,
+  payment_confirmed_at TIMESTAMP,
+  completed_at TIMESTAMP
+);
+
+-- Create indexes for bookings table
+CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON bookings(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_patient_id ON bookings(patient_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_reference_number ON bookings(reference_number);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_appointment_date ON bookings(appointment_date);
+CREATE INDEX IF NOT EXISTS idx_bookings_created_at ON bookings(created_at);
+
+-- Enable RLS on bookings table
+ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for bookings
+DROP POLICY IF EXISTS "Users can view their own bookings" ON bookings;
+CREATE POLICY "Users can view their own bookings"
+  ON bookings FOR SELECT
+  USING (auth.uid() = user_id OR auth.uid() = patient_id);
+
+DROP POLICY IF EXISTS "Users can create their own bookings" ON bookings;
+CREATE POLICY "Users can create their own bookings"
+  ON bookings FOR INSERT
+  WITH CHECK (auth.uid() = user_id OR auth.uid() = patient_id);
+
+DROP POLICY IF EXISTS "Users can update their own bookings" ON bookings;
+CREATE POLICY "Users can update their own bookings"
+  ON bookings FOR UPDATE
+  USING (auth.uid() = user_id OR auth.uid() = patient_id);
+
+-- Staff/Admin broad access policies for bookings (guarded)
+DO $$
+BEGIN
+  -- Staff: view all bookings
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' AND table_name = 'staff'
+  ) THEN
+    DROP POLICY IF EXISTS "Staff can view all bookings" ON bookings;
+    CREATE POLICY "Staff can view all bookings"
+      ON bookings FOR SELECT
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.staff s 
+          WHERE s.user_id = auth.uid() AND COALESCE(s.status, 'Active') = 'Active'
+        )
+      );
+
+    -- Staff: update all bookings (for approvals/reschedules)
+    DROP POLICY IF EXISTS "Staff can update all bookings" ON bookings;
+    CREATE POLICY "Staff can update all bookings"
+      ON bookings FOR UPDATE
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.staff s 
+          WHERE s.user_id = auth.uid() AND COALESCE(s.status, 'Active') = 'Active'
+        )
+      );
+  END IF;
+
+  -- Admins: view/update all bookings
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' AND table_name = 'admin_users'
+  ) THEN
+    DROP POLICY IF EXISTS "Admins can view all bookings" ON bookings;
+    CREATE POLICY "Admins can view all bookings"
+      ON bookings FOR SELECT
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.admin_users a 
+          WHERE a.user_id = auth.uid()
+        )
+      );
+
+    DROP POLICY IF EXISTS "Admins can update all bookings" ON bookings;
+    CREATE POLICY "Admins can update all bookings"
+      ON bookings FOR UPDATE
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.admin_users a 
+          WHERE a.user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 -- ======================================
 -- PHASE 2: APPROVAL SYSTEM & NOTIFICATIONS
@@ -278,6 +413,42 @@ DROP POLICY IF EXISTS "Users can create payments" ON payments;
 CREATE POLICY "Users can create payments"
   ON payments FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+-- Staff/Admin view access policies for payments (guarded)
+DO $$
+BEGIN
+  -- Staff can view all payments
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' AND table_name = 'staff'
+  ) THEN
+    DROP POLICY IF EXISTS "Staff can view all payments" ON payments;
+    CREATE POLICY "Staff can view all payments"
+      ON payments FOR SELECT
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.staff s 
+          WHERE s.user_id = auth.uid() AND COALESCE(s.status, 'Active') = 'Active'
+        )
+      );
+  END IF;
+
+  -- Admins can view all payments
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables 
+    WHERE table_schema = 'public' AND table_name = 'admin_users'
+  ) THEN
+    DROP POLICY IF EXISTS "Admins can view all payments" ON payments;
+    CREATE POLICY "Admins can view all payments"
+      ON payments FOR SELECT
+      USING (
+        EXISTS (
+          SELECT 1 FROM public.admin_users a 
+          WHERE a.user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 -- ======================================
 -- FUNCTIONS & TRIGGERS
