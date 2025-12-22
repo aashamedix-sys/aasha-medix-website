@@ -24,6 +24,7 @@ import RefundPolicy from '@/pages/RefundPolicy';
 import PatientLogin from '@/pages/PatientLogin';
 import PatientRegister from '@/pages/PatientRegister';
 import StaffLogin from '@/pages/StaffLogin';
+import AuthCallback from '@/pages/AuthCallback';
 
 // Booking Pages
 import BookDiagnosticTests from '@/pages/BookDiagnosticTests';
@@ -135,6 +136,8 @@ const AppContent = () => {
           <Route path="/register" element={<PatientRegister />} />
           <Route path="/staff-login" element={<StaffLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          {/* OAuth callback route */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
           
           <Route path="/setup" element={<Setup />} />
 
