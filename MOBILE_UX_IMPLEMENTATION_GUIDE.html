@@ -9,6 +9,107 @@
   and enables the corresponding features on devices ≤ 768px width.
 -->
 
+<style>
+  /* Styles for reference guide examples */
+  .faq-header {
+    padding: 16px;
+    background: #f5f5f5;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  
+  .faq-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .faq-icon {
+    transition: transform 0.3s ease;
+  }
+  
+  .faq-content {
+    padding: 12px 0;
+  }
+  
+  .services-view-all-button {
+    padding: 12px 24px;
+    background: #00A86B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: none;
+    margin-top: 24px;
+  }
+  
+  .text-clamp-mobile {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+  
+  .read-more-button {
+    color: #00A86B;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-top: 8px;
+  }
+  
+  .sticky-cta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 12px;
+    display: none;
+    gap: 8px;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .sticky-cta button {
+    flex: 1;
+    height: 44px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  
+  .call-button {
+    background: #E63946;
+    color: white;
+  }
+  
+  .call-button:hover {
+    background: #D62828;
+  }
+  
+  .whatsapp-button {
+    background: #25D366;
+    color: white;
+  }
+  
+  .whatsapp-button:hover {
+    background: #1FAE53;
+  }
+  
+  .services-view-all-container {
+    text-align: center;
+    margin-top: 24px;
+  }
+</style>
+
 <!-- ================================================================
      1️⃣ FAQ ACCORDION - Mobile Optimization
      ================================================================ -->
@@ -36,23 +137,23 @@
   <div data-faq-item>
     <div 
       data-faq-header
-      style="padding: 16px; background: #f5f5f5; cursor: pointer; border-radius: 8px;"
+      class="faq-header"
     >
-      <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="faq-header-content">
         <h3>What is AASHA MEDIX?</h3>
         <!-- Optional: Add icon that rotates on toggle -->
         <svg 
           data-faq-icon 
           width="20" height="20" 
           fill="none" stroke="currentColor"
-          style="transition: transform 0.3s ease;"
+          class="faq-icon"
         >
           <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </div>
     </div>
     
-    <div data-faq-content style="padding: 12px 0;">
+    <div data-faq-content class="faq-content">
       <p>AASHA MEDIX is a trusted healthcare platform offering diagnostics, telemedicine, and home care services across Telangana.</p>
     </div>
   </div>
@@ -60,22 +161,22 @@
   <div data-faq-item>
     <div 
       data-faq-header
-      style="padding: 16px; background: #f5f5f5; cursor: pointer; border-radius: 8px;"
+      class="faq-header"
     >
-      <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="faq-header-content">
         <h3>How do I book a diagnostic test?</h3>
         <svg 
           data-faq-icon 
           width="20" height="20" 
           fill="none" stroke="currentColor"
-          style="transition: transform 0.3s ease;"
+          class="faq-icon"
         >
           <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </div>
     </div>
     
-    <div data-faq-content style="padding: 12px 0;">
+    <div data-faq-content class="faq-content">
       <p>Click "Book Tests" on the homepage, select your test, and we'll arrange home sample collection at your convenience.</p>
     </div>
   </div>
@@ -119,19 +220,10 @@
   </div>
 
   <!-- "View All Services" Button -->
-  <div style="text-align: center; margin-top: 24px;">
+  <div class="services-view-all-container">
     <button 
       data-services-view-all
-      style="
-        padding: 12px 24px;
-        background: #00A86B;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: 600;
-        display: none; /* Hidden on desktop */
-      "
+      class="services-view-all-button"
     >
       View All Services
     </button>
@@ -160,7 +252,7 @@
 
 <article class="testimonial-item">
   <!-- Clamped text (2-3 lines) -->
-  <p class="text-clamp-2-mobile">
+  <p class="text-clamp-mobile">
     "AASHA MEDIX provides the most reliable healthcare service I've ever experienced. The home collection 
     service is incredibly convenient, and the doctors are highly professional. Highly recommended for anyone 
     in Telangana!"
@@ -169,15 +261,7 @@
   <!-- Read More Button -->
   <button 
     data-read-more-button
-    style="
-      color: #00A86B;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.875rem;
-      margin-top: 8px;
-    "
+    class="read-more-button"
   >
     Read More
   </button>
@@ -207,35 +291,13 @@
 
 <div 
   data-sticky-cta
-  style="
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: white;
-    border-top: 1px solid #e5e7eb;
-    padding: 12px;
-    display: none; /* Hidden on desktop, shown on mobile by JS */
-    gap: 8px;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-  "
+  class="sticky-cta"
 >
   <!-- Call Button -->
   <button 
     data-call-button
     data-phone="919876543210"
-    style="
-      flex: 1;
-      height: 44px;
-      background: #E63946;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.875rem;
-      cursor: pointer;
-    "
+    class="call-button"
   >
     📞 Call Us
   </button>
@@ -245,17 +307,7 @@
     data-whatsapp-button
     data-phone="919876543210"
     data-message="Hi AASHA MEDIX, I need help with your services."
-    style="
-      flex: 1;
-      height: 44px;
-      background: #25D366;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 0.875rem;
-      cursor: pointer;
-    "
+    class="whatsapp-button"
   >
     💬 WhatsApp
   </button>

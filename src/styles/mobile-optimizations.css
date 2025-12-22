@@ -13,7 +13,7 @@
 @media (max-width: 768px) {
   /* Reduce hero section height and padding */
   section.relative[style*="min-h-screen"] {
-    min-height: auto !important;
+    min-height: unset !important;
     padding-top: 16px !important;
     padding-bottom: 16px !important;
   }
@@ -514,10 +514,8 @@
    ================================================================================ */
 
 @media (max-width: 768px) {
-  /* Lazy load images */
-  img {
-    loading: lazy;
-  }
+  /* Lazy load images - HTML attribute, not CSS */
+  /* Note: Use loading="lazy" in HTML, not CSS */
 
   /* Optimize paint performance */
   .will-change-transform {
