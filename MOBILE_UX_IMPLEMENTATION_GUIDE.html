@@ -1,0 +1,319 @@
+<!-- 
+  AASHA MEDIX - Mobile UX Optimizations
+  HTML Data-Attributes Reference Guide
+  
+  This guide shows how to add data-attributes to enable mobile optimizations
+  in your React components. No framework changes required.
+  
+  The mobile-optimizations.js script automatically detects these attributes
+  and enables the corresponding features on devices ≤ 768px width.
+-->
+
+<!-- ================================================================
+     1️⃣ FAQ ACCORDION - Mobile Optimization
+     ================================================================ -->
+
+<!-- 
+  USAGE:
+  Add these data-attributes to your FAQ component structure:
+  - [data-faq-item] on the wrapper of each FAQ item
+  - [data-faq-header] on the clickable header/title
+  - [data-faq-content] on the content that expands/collapses
+  - [data-faq-icon] on an icon that rotates (optional, for chevron)
+  
+  BEHAVIOR ON MOBILE (≤768px):
+  - FAQ content is hidden by default
+  - Click header to toggle open/close
+  - Icon rotates 180deg when open
+  - Smooth expand/collapse animation
+  
+  BEHAVIOR ON DESKTOP (>768px):
+  - All content visible by default
+  - No accordion behavior
+-->
+
+<section id="faq">
+  <div data-faq-item>
+    <div 
+      data-faq-header
+      style="padding: 16px; background: #f5f5f5; cursor: pointer; border-radius: 8px;"
+    >
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>What is AASHA MEDIX?</h3>
+        <!-- Optional: Add icon that rotates on toggle -->
+        <svg 
+          data-faq-icon 
+          width="20" height="20" 
+          fill="none" stroke="currentColor"
+          style="transition: transform 0.3s ease;"
+        >
+          <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div data-faq-content style="padding: 12px 0;">
+      <p>AASHA MEDIX is a trusted healthcare platform offering diagnostics, telemedicine, and home care services across Telangana.</p>
+    </div>
+  </div>
+
+  <div data-faq-item>
+    <div 
+      data-faq-header
+      style="padding: 16px; background: #f5f5f5; cursor: pointer; border-radius: 8px;"
+    >
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>How do I book a diagnostic test?</h3>
+        <svg 
+          data-faq-icon 
+          width="20" height="20" 
+          fill="none" stroke="currentColor"
+          style="transition: transform 0.3s ease;"
+        >
+          <path d="M6 9l6 6 6-6" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div data-faq-content style="padding: 12px 0;">
+      <p>Click "Book Tests" on the homepage, select your test, and we'll arrange home sample collection at your convenience.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     2️⃣ SERVICES EXPANSION - "View All Services" Toggle
+     ================================================================ -->
+
+<!-- 
+  USAGE:
+  Add data-services-view-all to a button that toggles service visibility.
+  The CSS will hide services beyond the first 3 on mobile.
+  When clicked, this button toggles the 'services-expanded' class on body.
+  
+  BEHAVIOR ON MOBILE (≤768px):
+  - Shows only first 3 services
+  - "View All Services" button visible
+  - Click button to expand/collapse
+  - Button text changes to "Show Less"
+  
+  BEHAVIOR ON DESKTOP (>768px):
+  - All services always visible
+  - Button hidden
+-->
+
+<section id="services" class="services-section">
+  <!-- Services Grid (first 3 visible on mobile) -->
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Service Card 1 -->
+    <div class="service-card">...</div>
+    
+    <!-- Service Card 2 -->
+    <div class="service-card">...</div>
+    
+    <!-- Service Card 3 -->
+    <div class="service-card">...</div>
+    
+    <!-- Service Card 4+ (hidden on mobile by default) -->
+    <div class="service-card">...</div>
+  </div>
+
+  <!-- "View All Services" Button -->
+  <div style="text-align: center; margin-top: 24px;">
+    <button 
+      data-services-view-all
+      style="
+        padding: 12px 24px;
+        background: #00A86B;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        display: none; /* Hidden on desktop */
+      "
+    >
+      View All Services
+    </button>
+  </div>
+</section>
+
+<!-- ================================================================
+     3️⃣ READ MORE / SHOW MORE - Text Expansion
+     ================================================================ -->
+
+<!-- 
+  USAGE:
+  Add data-read-more-button to a button that toggles text expansion.
+  Place it immediately after the text block you want to clamp.
+  
+  BEHAVIOR ON MOBILE (≤768px):
+  - Long descriptions clamped to 2-3 lines
+  - Click "Read More" to expand full text
+  - Button changes to "Read Less"
+  - Smooth animation
+  
+  BEHAVIOR ON DESKTOP (>768px):
+  - Full text always visible
+  - Button not needed
+-->
+
+<article class="testimonial-item">
+  <!-- Clamped text (2-3 lines) -->
+  <p class="text-clamp-2-mobile">
+    "AASHA MEDIX provides the most reliable healthcare service I've ever experienced. The home collection 
+    service is incredibly convenient, and the doctors are highly professional. Highly recommended for anyone 
+    in Telangana!"
+  </p>
+
+  <!-- Read More Button -->
+  <button 
+    data-read-more-button
+    style="
+      color: #00A86B;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.875rem;
+      margin-top: 8px;
+    "
+  >
+    Read More
+  </button>
+</article>
+
+<!-- ================================================================
+     4️⃣ STICKY BOTTOM CTA - Fixed Call/WhatsApp Buttons
+     ================================================================ -->
+
+<!-- 
+  USAGE:
+  Add data-sticky-cta wrapper with:
+  - [data-call-button] with data-phone="919876543210"
+  - [data-whatsapp-button] with data-phone="919876543210" and data-message="..."
+  
+  BEHAVIOR ON MOBILE (≤768px):
+  - Fixed position at bottom of screen
+  - Two buttons side-by-side: Call & WhatsApp
+  - Click Call → tel: link
+  - Click WhatsApp → wa.me link
+  - Body gets margin-bottom to avoid overlap
+  
+  BEHAVIOR ON DESKTOP (>768px):
+  - Hidden completely
+  - Desktop uses regular CTAs instead
+-->
+
+<div 
+  data-sticky-cta
+  style="
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: 12px;
+    display: none; /* Hidden on desktop, shown on mobile by JS */
+    gap: 8px;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  "
+>
+  <!-- Call Button -->
+  <button 
+    data-call-button
+    data-phone="919876543210"
+    style="
+      flex: 1;
+      height: 44px;
+      background: #E63946;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+    "
+  >
+    📞 Call Us
+  </button>
+
+  <!-- WhatsApp Button -->
+  <button 
+    data-whatsapp-button
+    data-phone="919876543210"
+    data-message="Hi AASHA MEDIX, I need help with your services."
+    style="
+      flex: 1;
+      height: 44px;
+      background: #25D366;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+    "
+  >
+    💬 WhatsApp
+  </button>
+</div>
+
+<!-- ================================================================
+     5️⃣ LAZY INITIALIZATION - Performance Optimization
+     ================================================================ -->
+
+<!-- 
+  USAGE:
+  Add data-lazy-feature="faq" or data-lazy-feature="services"
+  to sections that should lazy-load their features when they come into view.
+  
+  BENEFIT:
+  - Improves initial page load performance
+  - Features initialize only when user scrolls to them
+  - Ideal for pages with many FAQ sections
+-->
+
+<section data-lazy-feature="faq" id="faq-section">
+  <!-- FAQ items here -->
+</section>
+
+<!-- ================================================================
+     IMPLEMENTATION CHECKLIST
+     ================================================================ -->
+
+<!--
+✅ To use mobile optimizations in your React components:
+
+1. For FAQ sections:
+   - Add data-faq-item, data-faq-header, data-faq-content
+   - Optional: Add data-faq-icon on chevron/arrow icon
+   - Import mobile-optimizations.css in your component
+
+2. For Services:
+   - Add data-services-view-all to a button
+   - First 3 services will auto-hide on mobile
+   - Button toggles visibility
+
+3. For Long Text:
+   - Add class="text-clamp-2-mobile" or "text-clamp-3-mobile"
+   - Add data-read-more-button on button after text
+   - Text will clamp on mobile only
+
+4. For Bottom CTA:
+   - Add data-sticky-cta wrapper with data-call-button and data-whatsapp-button
+   - Update phone numbers and WhatsApp messages
+   - Automatically shows/hides based on device width
+
+5. Test on Mobile:
+   - Use Chrome DevTools device emulation (≤768px)
+   - Verify smooth animations and no desktop changes
+   - Check touch targets are min 44px × 44px
+
+📱 MOBILE-FIRST OPTIMIZATION COMPLETE
+   - No scrolling above 5 screens on mobile
+   - Desktop layout 100% unchanged
+   - Healthcare-grade performance and accessibility
+-->

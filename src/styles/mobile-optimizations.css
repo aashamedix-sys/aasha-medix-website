@@ -1,0 +1,580 @@
+/* ================================================================================
+   AASHA MEDIX - MOBILE UX OPTIMIZATIONS
+   Healthcare-grade mobile-first CSS
+   Desktop layout remains 100% unchanged
+   Goal: Reduce mobile scroll by 40-60%, compress spacing, optimize content density
+   ================================================================================ */
+
+/* ================================================================================
+   1️⃣ CRITICAL: REDUCE VERTICAL SCROLL ON MOBILE
+   ================================================================================ */
+
+/* Hero Section - Compressed Mobile Layout */
+@media (max-width: 768px) {
+  /* Reduce hero section height and padding */
+  section.relative[style*="min-h-screen"] {
+    min-height: auto !important;
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+  }
+
+  /* Container and grid compression */
+  .container.mx-auto {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* Flex layout compression for mobile */
+  .flex.flex-col.lg\:flex-row {
+    gap: 12px !important;
+  }
+
+  /* Space utilities reduction */
+  .space-y-6 {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(8px * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(8px * var(--tw-space-y-reverse));
+  }
+
+  .space-y-3 {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(4px * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(4px * var(--tw-space-y-reverse));
+  }
+
+  .space-y-4 {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(8px * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(8px * var(--tw-space-y-reverse));
+  }
+}
+
+/* Section Padding Compression */
+@media (max-width: 768px) {
+  .section-padding {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Global section spacing */
+  section {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+  }
+
+  /* Reduce margins on key elements */
+  h1, h2, h3 {
+    margin-bottom: 8px !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important; /* Reduced from 2xl */
+    line-height: 1.3;
+  }
+
+  h1 {
+    font-size: 1.75rem !important; /* Reduced from 4xl */
+  }
+
+  h3 {
+    font-size: 1.125rem !important; /* Reduced from xl */
+  }
+
+  /* Paragraph spacing */
+  p {
+    margin-bottom: 8px !important;
+  }
+}
+
+/* ================================================================================
+   2️⃣ MOBILE-SPECIFIC SPACING RULES
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Card and box spacing */
+  .card-premium,
+  .card-elevated,
+  [role="region"] {
+    padding: 16px !important;
+    margin-bottom: 12px !important;
+    gap: 8px !important;
+  }
+
+  /* Grid gap reduction */
+  .grid {
+    gap: 12px !important;
+  }
+
+  /* Button spacing */
+  .btn-primary,
+  .btn-secondary,
+  button {
+    padding: 10px 16px !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Text block spacing */
+  .leading-relaxed {
+    line-height: 1.4;
+  }
+
+  /* Border and divider spacing */
+  .border-t,
+  .border-b {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+  }
+}
+
+/* ================================================================================
+   3️⃣ COLLAPSE HEAVY SECTIONS ON MOBILE
+   ================================================================================ */
+
+/* Services Section - Show only top 3 on mobile */
+@media (max-width: 768px) {
+  /* Hide services beyond the first 3 by default */
+  .grid.sm\:grid-cols-2.lg\:grid-cols-3 > div:nth-child(n+4) {
+    display: none;
+  }
+
+  /* Show "View All Services" button */
+  .services-view-all-button {
+    display: block !important;
+  }
+
+  /* Expanded state shows all services */
+  body.services-expanded .grid.sm\:grid-cols-2.lg\:grid-cols-3 > div {
+    display: block;
+  }
+
+  body.services-expanded .services-view-all-button {
+    display: none !important;
+  }
+}
+
+/* FAQ Section - Accordion on mobile */
+@media (max-width: 768px) {
+  /* FAQ items show only title by default */
+  .faq-item-content {
+    display: none;
+  }
+
+  /* Open state shows content */
+  .faq-item.open .faq-item-content {
+    display: block;
+    padding: 12px 0;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  /* Accordion chevron rotation */
+  .faq-item-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .faq-item.open .faq-item-icon {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    overflow: visible;
+  }
+}
+
+/* Long text blocks - Clamp to 2-3 lines */
+@media (max-width: 768px) {
+  .text-clamp-2-mobile {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .text-clamp-3-mobile {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+
+  /* "Read more" toggle button */
+  .read-more-button {
+    display: inline-block;
+    color: #00A86B;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  /* Expanded text state */
+  .text-expanded {
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    line-clamp: unset !important;
+  }
+}
+
+/* ================================================================================
+   4️⃣ OPTIMIZE STATS & COUNTERS
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Stats section - 2-column grid instead of 4 */
+  .stats-grid,
+  .grid.md\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  /* Stat card compression */
+  .stat-card {
+    padding: 12px !important;
+  }
+
+  .stat-number {
+    font-size: 1.5rem !important; /* Reduced from 2.5rem */
+  }
+
+  .stat-label {
+    font-size: 0.75rem !important; /* Reduced from 0.875rem */
+  }
+}
+
+/* ================================================================================
+   5️⃣ IMAGE OPTIMIZATION FOR MOBILE
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Remove decorative secondary images */
+  .hidden.md\:block,
+  img[alt*="secondary"],
+  img[alt*="decoration"],
+  img[alt*="Happy Patient"] {
+    display: none !important;
+  }
+
+  /* Keep only primary hero image */
+  img[alt*="doctor"],
+  img[alt*="Caring"],
+  .main-hero-image {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 300px !important;
+    object-fit: cover;
+  }
+
+  /* Hero image container optimization */
+  .relative.h-\[400px\].md\:h-\[500px\],
+  [style*="height: 400px"],
+  [style*="height: 500px"] {
+    height: auto !important;
+    max-height: 250px !important;
+  }
+
+  /* Image lazy loading - responsive */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Background images - hide on mobile for performance */
+  .absolute.top-1\/2.right-1\/4.w-72.h-72 {
+    display: none !important;
+  }
+}
+
+/* ================================================================================
+   6️⃣ BUTTON & CTA OPTIMIZATION
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Minimize CTA repetition - hide secondary CTAs */
+  .secondary-cta,
+  button.btn-secondary:nth-of-type(n+2),
+  a.btn-primary:nth-of-type(n+3) {
+    display: none;
+  }
+
+  /* Keep only primary CTA near top */
+  .primary-cta:first-of-type {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  /* Sticky bottom CTA (WhatsApp / Call) */
+  .sticky-cta,
+  .mobile-sticky-cta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: white;
+    border-top: 1px solid #E5E7EB;
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .sticky-cta button {
+    flex: 1;
+    height: 44px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  /* Add bottom margin to body to avoid sticky CTA overlap */
+  body.has-sticky-cta {
+    margin-bottom: 60px;
+  }
+
+  /* Call button in sticky CTA */
+  .sticky-cta .call-button {
+    background: #E63946;
+    color: white;
+  }
+
+  .sticky-cta .call-button:hover {
+    background: #D62828;
+  }
+
+  /* WhatsApp button in sticky CTA */
+  .sticky-cta .whatsapp-button {
+    background: #25D366;
+    color: white;
+  }
+
+  .sticky-cta .whatsapp-button:hover {
+    background: #1FAE53;
+  }
+}
+
+/* ================================================================================
+   7️⃣ TYPOGRAPHY ADJUSTMENTS
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Reduce heading sizes on mobile */
+  body {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  h1 {
+    font-size: 1.5rem !important;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 1rem !important;
+    line-height: 1.3;
+  }
+
+  h4, h5, h6 {
+    font-size: 0.9375rem !important;
+  }
+
+  p, li {
+    font-size: 0.875rem !important;
+    line-height: 1.4;
+  }
+
+  /* Maintain clear hierarchy */
+  strong, b {
+    font-weight: 600;
+  }
+
+  em, i {
+    font-style: italic;
+  }
+}
+
+/* ================================================================================
+   8️⃣ UTILITY OPTIMIZATIONS FOR MOBILE
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Hide large shadows on mobile - performance */
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Reduce transitions on mobile - performance */
+  * {
+    transition-duration: 150ms !important;
+  }
+
+  /* Simplify animations */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Ensure readable touch targets */
+  button, a[role="button"], [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 14px;
+  }
+
+  /* Full-width buttons on mobile */
+  .w-full {
+    width: 100% !important;
+  }
+
+  /* Container max-width on mobile */
+  .max-w-7xl {
+    max-width: 100% !important;
+  }
+}
+
+/* ================================================================================
+   9️⃣ DIALOG & MODAL OPTIMIZATION
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Make dialogs full-width with less padding */
+  .max-w-xl {
+    max-width: 100% !important;
+  }
+
+  [role="dialog"],
+  .dialog,
+  .modal {
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .DialogContent {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    padding: 16px !important;
+  }
+}
+
+/* ================================================================================
+   🔟 TESTIMONIALS & CARDS OPTIMIZATION
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Card grid compression */
+  .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Testimonial card reduction */
+  .testimonial-card {
+    padding: 12px !important;
+  }
+
+  .testimonial-quote {
+    font-size: 0.875rem !important;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .testimonial-author {
+    font-size: 0.8125rem !important;
+  }
+}
+
+/* ================================================================================
+   1️⃣1️⃣ PERFORMANCE & ACCESSIBILITY
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Lazy load images */
+  img {
+    loading: lazy;
+  }
+
+  /* Optimize paint performance */
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  /* Reduce GPU burden on mobile */
+  * {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Safe area for notched devices */
+  @supports (padding: max(0px)) {
+    body {
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
+    }
+  }
+}
+
+/* ================================================================================
+   FINAL: MOBILE-FIRST RESET & ENHANCEMENT
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* Ensure no element exceeds viewport width */
+  * {
+    max-width: 100vw;
+  }
+
+  /* Remove horizontal scrolling */
+  html, body {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  /* Touch-friendly spacing */
+  a, button, [role="button"] {
+    padding: 10px;
+    min-height: 44px;
+  }
+
+  /* Form inputs optimization */
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ================================================================================ */
+/* END OF MOBILE OPTIMIZATIONS */
+/* Desktop CSS remains completely untouched */
+/* ================================================================================ */

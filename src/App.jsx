@@ -4,6 +4,10 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'r
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TrustDivider from '@/components/TrustDivider';
+
+// Mobile Optimizations - Healthcare UX
+import '@/styles/mobile-optimizations.css';
+import '@/utils/mobile-optimizations.js';
 import Home from '@/pages/Home';
 import About from '@/pages/About';
 import Services from '@/pages/Services';
