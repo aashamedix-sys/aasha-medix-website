@@ -83,6 +83,11 @@
   a {
     @apply text-[#00A86B] hover:text-[#1B7F56] transition-colors duration-200;
   }
+
+  input, select, textarea {
+    -webkit-appearance: none;
+    appearance: none;
+  }
 }
 
 @layer components {
@@ -128,6 +133,12 @@
 }
 
 @layer utilities {
+  /* LINE CLAMP UTILITIES (standard + webkit) */
+  .line-clamp-1 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1; overflow: hidden; }
+  .line-clamp-2 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+  .line-clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+  .line-clamp-4 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+  .line-clamp-none { display: block; -webkit-line-clamp: unset; line-clamp: unset; }
   /* COLORS - MEDICAL PALETTE */
   .text-medical-primary {
     @apply text-[#00A86B];

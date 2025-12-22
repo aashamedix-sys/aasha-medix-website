@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { supabase } from '@/lib/customSupabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -86,7 +85,8 @@ const PatientRegister = () => {
 
     setLoading(true);
     try {
-      // 1. Sign up user in Auth
+      // Supabase trigger (handle_new_patient_auth) will create the patient row after signup.
+      // We only need to create the auth user here.
       const { data: authData, error: authError } = await signUp(formData.email, formData.password, {
         data: {
           full_name: formData.fullName,
@@ -96,32 +96,11 @@ const PatientRegister = () => {
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error("Registration failed. Please try again.");
-
-      // 2. Create Patient Profile
-      const { error: profileError } = await supabase.from('patients').insert([{
-        user_id: authData.user.id,
-        full_name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        mobile: formData.phone,
-        date_of_birth: formData.dob,
-        gender: formData.gender,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        pincode: formData.pincode
-      }]);
-
-      if (profileError) {
-        // Fallback: If profile creation fails, we might want to clean up auth user, but for now just warn
-        console.error("Profile creation error:", profileError);
-        throw new Error("Account created but profile setup failed. Please contact support.");
-      }
+      if (!authData?.user) throw new Error("Registration failed. Please try again.");
 
       toast({ 
         title: "Registration Successful! 🎉", 
-        description: "Please check your email to verify your account before logging in." 
+        description: "Please check your email to verify your account. Your profile will be ready after verification." 
       });
       
       navigate('/patient-login');
@@ -331,7 +310,11 @@ const PatientRegister = () => {
             {/* Terms */}
             <div className="space-y-4 pt-4">
               <div className="flex items-center space-x-2">
-                <Checkbox id="terms" checked={formData.terms} onCheckedChange={(c) => handleChange('terms', c)} />
+                <Checkbox
+                  id="terms"
+                  checked={formData.terms}
+                  onCheckedChange={(checked) => handleChange('terms', checked === true)}
+                />
                 <Label htmlFor="terms" className="text-sm text-gray-600">
                   I agree to the <Link to="/terms-conditions" className="text-green-600 hover:underline">Terms & Conditions</Link> and <Link to="/privacy-policy" className="text-green-600 hover:underline">Privacy Policy</Link>
                 </Label>
