@@ -1,0 +1,239 @@
+/* ================================================================================
+   AASHA MEDIX - FINAL POLISH - MOBILE SPACING EFFICIENCY
+   
+   GOAL: Compact, balanced mobile experience
+   - Reduce excessive vertical white space
+   - Optimize hero section height
+   - Ensure above-the-fold visibility
+   - Remove visual wastage between sections
+   - Maintain desktop integrity (zero visual changes)
+   
+   NOTE: These CSS fixes are applied ONLY to mobile (≤768px) via media queries
+   Desktop remains 100% unchanged.
+   ================================================================================ */
+
+@media (max-width: 768px) {
+  /* ========== 1. HERO SECTION - Reduce excessive height ========== */
+  
+  /* Remove min-h-screen on mobile, use auto height with padding-based spacing */
+  section.relative[style*="min-h-screen"],
+  section[className*="min-h-screen"] {
+    min-height: unset;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+  
+  /* Hero content container - reduce padding */
+  section.relative > div.container {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  
+  /* ========== 2. SECTION GAPS - Eliminate excess between-section whitespace ========== */
+  
+  /* Reduce gap between sections */
+  section {
+    margin-bottom: 0;
+  }
+  
+  section + section {
+    margin-top: 0;
+  }
+  
+  /* Tight section padding */
+  section:not(.relative) {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  
+  /* ========== 3. CARD & CONTENT SPACING - Compact stack ========== */
+  
+  /* Grid items - reduce gap */
+  .grid {
+    gap: 12px !important;
+  }
+  
+  /* Card padding optimization */
+  [class*="card"],
+  [class*="Card"] {
+    padding: 14px !important;
+  }
+  
+  /* List and flex gaps */
+  .flex[class*="gap"] {
+    gap: 8px !important;
+  }
+  
+  /* ========== 4. TYPOGRAPHY - Remove excess margins ========== */
+  
+  h1 { margin: 8px 0 6px 0 !important; }
+  h2 { margin: 8px 0 6px 0 !important; }
+  h3 { margin: 6px 0 4px 0 !important; }
+  h4 { margin: 4px 0 2px 0 !important; }
+  p { margin: 4px 0 !important; }
+  
+  /* Remove heading bottom margin excess */
+  h1 + p,
+  h2 + p,
+  h3 + p {
+    margin-top: 6px !important;
+  }
+  
+  /* ========== 5. SPACING UTILITIES - Optimize Tailwind classes ========== */
+  
+  /* Reduce py-* (vertical padding) on mobile */
+  .py-4 { padding-top: 8px; padding-bottom: 8px; }
+  .py-6 { padding-top: 12px; padding-bottom: 12px; }
+  .py-8 { padding-top: 16px; padding-bottom: 16px; }
+  .py-12 { padding-top: 20px; padding-bottom: 20px; }
+  .py-16 { padding-top: 20px; padding-bottom: 20px; }
+  .py-20 { padding-top: 24px; padding-bottom: 24px; }
+  .py-24 { padding-top: 24px; padding-bottom: 24px; }
+  
+  /* Reduce my-* (vertical margin) on mobile */
+  .my-2 { margin-top: 2px; margin-bottom: 2px; }
+  .my-3 { margin-top: 4px; margin-bottom: 4px; }
+  .my-4 { margin-top: 6px; margin-bottom: 6px; }
+  .my-6 { margin-top: 8px; margin-bottom: 8px; }
+  .my-8 { margin-top: 12px; margin-bottom: 12px; }
+  
+  /* Reduce mb-* (bottom margin) on mobile */
+  .mb-4 { margin-bottom: 6px; }
+  .mb-6 { margin-bottom: 8px; }
+  .mb-8 { margin-bottom: 12px; }
+  .mb-12 { margin-bottom: 16px; }
+  
+  /* Reduce mt-* (top margin) on mobile */
+  .mt-4 { margin-top: 6px; }
+  .mt-6 { margin-top: 8px; }
+  .mt-8 { margin-top: 12px; }
+  
+  /* ========== 6. FLEX/GRID GAPS - Tight spacing ========== */
+  
+  .gap-4 { gap: 8px !important; }
+  .gap-6 { gap: 10px !important; }
+  .gap-8 { gap: 12px !important; }
+  .gap-10 { gap: 14px !important; }
+  .gap-12 { gap: 16px !important; }
+  
+  .space-y-3 > * + * { margin-top: 4px; }
+  .space-y-4 > * + * { margin-top: 6px; }
+  .space-y-6 > * + * { margin-top: 8px; }
+  .space-y-8 > * + * { margin-top: 12px; }
+  
+  /* ========== 7. BUTTON SPACING - Prevent excessive CTA gaps ========== */
+  
+  button, [role="button"], a[class*="btn"] {
+    margin-bottom: 6px !important;
+  }
+  
+  button + button,
+  [role="button"] + [role="button"] {
+    margin-top: 6px !important;
+  }
+  
+  /* ========== 8. MODAL & DIALOG SPACING ========== */
+  
+  [role="dialog"],
+  .modal,
+  .dialog {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  /* ========== 9. IMAGE OPTIMIZATION - Prevent height bloat ========== */
+  
+  img {
+    max-height: 300px;
+    object-fit: cover;
+  }
+  
+  /* Hero image containers */
+  [class*="hero"] img,
+  .relative > div > img {
+    max-height: 250px;
+  }
+  
+  /* ========== 10. BORDER & DIVIDER SPACING ========== */
+  
+  hr, [class*="border-t"], [class*="border-b"] {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  /* ========== 11. PREVENT LAYOUT SHIFTS ========== */
+  
+  /* Stable min-heights where needed */
+  .btn-primary, .btn-secondary {
+    min-height: 44px;
+  }
+  
+  /* Prevent text reflow */
+  p, span, a, li {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* ========== 12. FLOATING ELEMENTS - Avoid overlaps ========== */
+  
+  /* Floating action buttons */
+  [class*="floating"],
+  [class*="sticky"],
+  [class*="fixed"] {
+    z-index: 40;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Ensure body has bottom padding for sticky elements */
+  body {
+    padding-bottom: 60px;
+  }
+  
+  /* ========== 13. CONTAINER PADDING - Consistent edges ========== */
+  
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  
+  /* ========== 14. RESPONSIVE ADJUSTMENTS ========== */
+  
+  /* Prevent text overflow */
+  .line-clamp-none {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  
+  /* Readable line length */
+  p, li, span {
+    max-width: 100%;
+  }
+  
+  /* ========== 15. WHITESPACE REMOVAL ========== */
+  
+  /* No excessive padding on wrapper divs */
+  main, [role="main"] {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  
+  /* Remove extra vertical space from containers */
+  .container > * {
+    margin-top: 0;
+  }
+  
+  .container > * + * {
+    margin-top: 12px;
+  }
+}
+
+/* ================================================================================
+   DESKTOP SAFEGUARD: All styles above only apply to mobile (max-width: 768px)
+   Desktop (min-width: 769px) remains 100% unchanged from original design.
+   ================================================================================ */
+
+/* ================================================================================
+   END OF FINAL POLISH
+   ================================================================================ */

@@ -7,6 +7,7 @@ import TrustDivider from '@/components/TrustDivider';
 
 // Mobile Optimizations - Healthcare UX
 import '@/styles/mobile-optimizations.css';
+import '@/styles/final-polish.css';
 import '@/utils/mobile-optimizations.js';
 import Home from '@/pages/Home';
 import About from '@/pages/About';
