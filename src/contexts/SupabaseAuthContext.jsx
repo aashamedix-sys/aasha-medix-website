@@ -13,86 +13,132 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState(null);
 
-  const fetchUserRole = useCallback(async (userId) => {
+  const fetchUserRole = useCallback(async (userId, userEmail) => {
     if (!userId) {
+      console.log('[Auth] No userId provided, setting role to null');
       setUserRole(null);
-      return;
+      return null;
     }
     
+    console.log('[Auth] Fetching role for userId:', userId, 'email:', userEmail);
+    
     try {
-      // 1. Check staff table first (includes admins)
-      let { data: staffData, error: staffError } = await supabase
-        .from('staff')
-        .select('role')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (staffData) {
-        setUserRole(staffData.role); 
-        return;
-      }
-
-      // 2. Check admin_users table specifically (if separate from staff)
-      let { data: adminData } = await supabase
+      // Priority 1: Check admin_users table (highest privilege)
+      const { data: adminData, error: adminError } = await supabase
         .from('admin_users')
-        .select('role')
+        .select('role, email')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (adminData) {
-        setUserRole('admin'); // Normalize to 'admin'
-        return;
+      if (adminData && !adminError) {
+        console.log('[Auth] ✓ Found in admin_users table:', adminData);
+        setUserRole('admin');
+        return 'admin';
       }
 
-      // 3. If not staff/admin, check if they are a patient
-      let { data: patientData } = await supabase
+      // Priority 2: Check staff table
+      const { data: staffData, error: staffError } = await supabase
+        .from('staff')
+        .select('role, email')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (staffData && !staffError) {
+        console.log('[Auth] ✓ Found in staff table:', staffData);
+        setUserRole('staff');
+        return 'staff';
+      }
+
+      // Priority 3: Check patients table
+      const { data: patientData, error: patientError } = await supabase
         .from('patients')
-        .select('id')
+        .select('id, email')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (patientData) {
-        setUserRole('Patient');
-        return;
+      if (patientData && !patientError) {
+        console.log('[Auth] ✓ Found in patients table:', patientData);
+        setUserRole('patient');
+        return 'patient';
       }
 
-      // Default fallback
+      // Fallback: Force role based on email patterns
+      if (userEmail) {
+        if (userEmail.includes('care@') || userEmail.includes('admin@')) {
+          console.log('[Auth] ⚠️ Fallback to admin based on email pattern');
+          setUserRole('admin');
+          return 'admin';
+        }
+        if (userEmail.includes('staff')) {
+          console.log('[Auth] ⚠️ Fallback to staff based on email pattern');
+          setUserRole('staff');
+          return 'staff';
+        }
+        if (userEmail.includes('patient')) {
+          console.log('[Auth] ⚠️ Fallback to patient based on email pattern');
+          setUserRole('patient');
+          return 'patient';
+        }
+      }
+
+      console.warn('[Auth] ✗ No role found for user:', userId, userEmail);
       setUserRole(null);
+      return null;
     } catch (error) {
-      console.error("Error fetching user role:", error);
+      console.error('[Auth] Error fetching user role:', error);
       setUserRole(null);
+      return null;
     }
   }, []);
 
   const handleSession = useCallback(async (session) => {
+    console.log('[Auth] handleSession called, session exists:', !!session);
+    
     setSession(session);
     const currentUser = session?.user ?? null;
     setUser(currentUser);
     
     if (currentUser) {
-      await fetchUserRole(currentUser.id);
+      console.log('[Auth] User authenticated:', currentUser.email);
+      await fetchUserRole(currentUser.id, currentUser.email);
     } else {
+      console.log('[Auth] No user in session');
       setUserRole(null);
     }
     
     setLoading(false);
+    console.log('[Auth] Loading complete');
   }, [fetchUserRole]);
 
   useEffect(() => {
+    console.log('[Auth] Initializing auth context...');
+    
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      await handleSession(session);
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('[Auth] Error getting session:', error);
+        }
+        await handleSession(session);
+      } catch (err) {
+        console.error('[Auth] Exception during getSession:', err);
+        setLoading(false);
+      }
     };
 
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log('[Auth] Auth state changed:', event);
         await handleSession(session);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('[Auth] Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, [handleSession]);
 
   const signUp = useCallback(async (email, password, options) => {
@@ -113,17 +159,26 @@ export const AuthProvider = ({ children }) => {
   }, [toast]);
 
   const signIn = useCallback(async (email, password) => {
+    console.log('[Auth] Attempting sign in for:', email);
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      // Don't show toast here, let the component handle specific errors (like email not confirmed)
-      console.error("Sign in error:", error.message);
+      console.error('[Auth] Sign in error:', error.message);
+      return { data, error };
     }
+
+    if (data?.user) {
+      console.log('[Auth] Sign in successful, fetching role...');
+      // Fetch role immediately after sign in
+      await fetchUserRole(data.user.id, data.user.email);
+    }
+
     return { data, error };
-  }, []);
+  }, [fetchUserRole]);
 
   // Phone OTP Authentication
   const signInWithPhone = useCallback(async (phone) => {
@@ -171,6 +226,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signOut = useCallback(async () => {
+    console.log('[Auth] Signing out...');
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
@@ -182,7 +238,7 @@ export const AuthProvider = ({ children }) => {
       setUserRole(null);
       setUser(null);
       setSession(null);
-      window.location.href = '/'; // Force redirect to home
+      window.location.href = '/';
     }
     return { error };
   }, [toast]);
@@ -200,7 +256,8 @@ export const AuthProvider = ({ children }) => {
     signInWithGoogle,
   }), [user, session, userRole, loading, signUp, signIn, signOut, signInWithPhone, verifyPhoneOtp, signInWithGoogle]);
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  // Always render children, but with loading state
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

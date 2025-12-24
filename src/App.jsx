@@ -56,33 +56,61 @@ import AashaDostChatbot from '@/components/AashaDostChatbot';
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, userRole, loading } = useAuth();
   
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-[#0FA958] border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-gray-500 font-medium">Verifying access...</p>
-      </div>
-    </div>
-  );
+  console.log('[ProtectedRoute] Checking access - user:', !!user, 'role:', userRole, 'loading:', loading, 'allowedRoles:', allowedRoles);
   
+  // CRITICAL: Show loading spinner while auth is initializing
+  if (loading) {
+    console.log('[ProtectedRoute] Auth loading, showing spinner...');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
+        <div className="flex flex-col items-center gap-4 bg-white p-8 rounded-2xl shadow-xl">
+          <div className="w-16 h-16 border-4 border-[#0FA958] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-700 font-semibold text-lg">Verifying access...</p>
+          <p className="text-gray-500 text-sm">Please wait</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Check if user is authenticated
   if (!user) {
+    console.log('[ProtectedRoute] No user, redirecting to login...');
     const path = window.location.pathname;
     if (path.startsWith('/admin')) return <Navigate to="/admin/login" replace />;
     if (path.startsWith('/staff')) return <Navigate to="/staff-login" replace />;
     return <Navigate to="/patient-login" replace />;
   }
 
-  if (allowedRoles) {
+  // Check if role is required and valid
+  if (allowedRoles && allowedRoles.length > 0) {
     const normalizedRole = (userRole || '').toLowerCase();
-    const isAllowed = allowedRoles.some(role => role.toLowerCase() === normalizedRole);
+    const normalizedAllowedRoles = allowedRoles.map(r => r.toLowerCase());
+    
+    console.log('[ProtectedRoute] Role check - user role:', normalizedRole, 'allowed:', normalizedAllowedRoles);
+    
+    const isAllowed = normalizedAllowedRoles.includes(normalizedRole);
     
     if (!isAllowed) {
-       if (normalizedRole === 'admin' || normalizedRole === 'super admin') return <Navigate to="/admin/dashboard" replace />;
-       if (normalizedRole === 'patient') return <Navigate to="/patient" replace />;
-       return <Navigate to="/staff" replace />;
+      console.log('[ProtectedRoute] Role not allowed, redirecting based on user role...');
+      
+      // Redirect to appropriate dashboard based on actual role
+      if (normalizedRole === 'admin') {
+        return <Navigate to="/admin/dashboard" replace />;
+      }
+      if (normalizedRole === 'staff') {
+        return <Navigate to="/staff" replace />;
+      }
+      if (normalizedRole === 'patient') {
+        return <Navigate to="/patient" replace />;
+      }
+      
+      // If no role found, send to login
+      console.warn('[ProtectedRoute] No valid role found, redirecting to login');
+      return <Navigate to="/patient-login" replace />;
     }
   }
   
+  console.log('[ProtectedRoute] ✓ Access granted');
   return children;
 };
 
@@ -142,9 +170,9 @@ const AppContent = () => {
           <Route path="/setup" element={<Setup />} />
 
           {/* Protected Routes */}
-          <Route path="/profile" element={<ProtectedRoute allowedRoles={['Patient']}><UserProfile /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute allowedRoles={['patient']}><UserProfile /></ProtectedRoute>} />
           
-          <Route path="/patient/*" element={<ProtectedRoute allowedRoles={['Patient']}><Routes>
+          <Route path="/patient/*" element={<ProtectedRoute allowedRoles={['patient']}><Routes>
               <Route path="/" element={<PatientDashboard />} />
               <Route path="/dashboard" element={<PatientDashboard />} />
               <Route path="/reports" element={<PatientReports />} />
@@ -152,9 +180,9 @@ const AppContent = () => {
               <Route path="/profile" element={<PatientProfile />} />
           </Routes></ProtectedRoute>} />
 
-          <Route path="/staff/*" element={<ProtectedRoute allowedRoles={['Phlebotomist', 'Doctor', 'Technician', 'Receptionist', 'Staff']}><StaffDashboard /></ProtectedRoute>} />
+          <Route path="/staff/*" element={<ProtectedRoute allowedRoles={['staff']}><StaffDashboard /></ProtectedRoute>} />
           
-          <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['Admin', 'Super Admin']}><Routes>
+          <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['admin']}><Routes>
               <Route path="/" element={<AdminDashboard />} />
               <Route path="/dashboard" element={<AdminDashboard />} />
               {/* Admin Import Price List UI */}
