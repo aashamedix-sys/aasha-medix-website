@@ -1,11 +1,53 @@
 -- ========================================
--- AASHA MEDIX PRODUCTION DATABASE SCHEMA
+-- AASHA MEDIX PRODUCTION DATABASE SCHEMA  
 -- Migration 1004: Complete Backend Tables
 -- Date: December 25, 2025
+-- VERSION: 1.1 (Fixed - with policy cleanup)
 -- ========================================
 
 -- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ========================================
+-- CLEANUP: Drop existing policies if any
+-- ========================================
+DO $$ 
+BEGIN
+    -- Drop all existing policies on tables (if they exist)
+    DROP POLICY IF EXISTS "Admin full access to doctors" ON public.doctors;
+    DROP POLICY IF EXISTS "Staff can read and modify doctors" ON public.doctors;
+    DROP POLICY IF EXISTS "Patients can view available doctors" ON public.doctors;
+    DROP POLICY IF EXISTS "Public can view available doctors" ON public.doctors;
+    
+    DROP POLICY IF EXISTS "Admin full access to tests" ON public.tests;
+    DROP POLICY IF EXISTS "Staff can read and modify tests" ON public.tests;
+    DROP POLICY IF EXISTS "Patients can view active tests" ON public.tests;
+    DROP POLICY IF EXISTS "Public can view active tests" ON public.tests;
+    
+    DROP POLICY IF EXISTS "Admin full access to bookings" ON public.bookings;
+    DROP POLICY IF EXISTS "Staff can manage all bookings" ON public.bookings;
+    DROP POLICY IF EXISTS "Patients can view own bookings" ON public.bookings;
+    DROP POLICY IF EXISTS "Patients can create own bookings" ON public.bookings;
+    DROP POLICY IF EXISTS "Patients can update own pending bookings" ON public.bookings;
+    
+    DROP POLICY IF EXISTS "Admin full access to doctor_bookings" ON public.doctor_bookings;
+    DROP POLICY IF EXISTS "Staff can manage doctor bookings" ON public.doctor_bookings;
+    DROP POLICY IF EXISTS "Patients can view own doctor bookings" ON public.doctor_bookings;
+    DROP POLICY IF EXISTS "Patients can create doctor bookings" ON public.doctor_bookings;
+    
+    DROP POLICY IF EXISTS "Admin full access to leads" ON public.leads;
+    DROP POLICY IF EXISTS "Staff can manage leads" ON public.leads;
+    
+    DROP POLICY IF EXISTS "Admin full access to analytics" ON public.analytics;
+    DROP POLICY IF EXISTS "Staff can view analytics" ON public.analytics;
+    
+    DROP POLICY IF EXISTS "Admin full access to reports" ON public.reports;
+    DROP POLICY IF EXISTS "Staff can manage reports" ON public.reports;
+    DROP POLICY IF EXISTS "Patients can view own reports" ON public.reports;
+EXCEPTION
+    WHEN undefined_table THEN NULL;
+    WHEN undefined_object THEN NULL;
+END $$;
 
 -- ========================================
 -- 1️⃣ DOCTORS TABLE
