@@ -87,19 +87,37 @@ const Setup = () => {
     }
   };
 
-  // Helper: Try to get user_id from auth.users by email lookup via sign-in attempt
-  const getUserIdByEmail = async (email, password) => {
+  // Helper: Get user_id from auth.users table directly (admin-level, no sign-in needed)
+  const getAuthUserIdByEmail = async (email) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (data?.user?.id) {
-        // Sign out immediately to avoid session conflicts
-        await supabase.auth.signOut();
-        return data.user.id;
-      }
+      const { data, error } = await supabase.rpc('get_user_id_by_email', { user_email: email });
+      if (!error && data) return data;
+      
+      // Fallback: try sign-in
+      const { data: signInData } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password: 'temp' // Will fail but we just want to test connection 
+      });
+      // Don't actually use this, but if it succeeds, user exists
     } catch (e) {
-      // Ignore errors
+      // Ignore
     }
     return null;
+  };
+
+  // Helper: Confirm email in auth.users for admin seeding (allows login without confirmation)
+  const confirmAuthEmail = async (userId) => {
+    try {
+      const { error } = await supabase.rpc('confirm_user_email', { user_id: userId });
+      if (error) {
+        console.warn('Email confirmation failed:', error);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.warn('Email confirmation RPC failed:', e);
+      return false;
+    }
   };
 
   const runSetup = async () => {
@@ -127,8 +145,8 @@ const Setup = () => {
             if (exists && existingUserId) {
                 addLog(`✓ Profile exists for ${user.email} (user_id: ${existingUserId.slice(0, 8)}...). Skipping.`, 'success');
                 skipCount++;
-                createdCreds.push(user); // Include in credentials list
-                await delay(200); // Small delay before next user
+                createdCreds.push(user);
+                await delay(200);
                 continue;
             }
 
@@ -145,22 +163,10 @@ const Setup = () => {
                 if (authError.message.toLowerCase().includes('rate limit')) {
                     addLog(`⚠️  Rate limit hit. Waiting 3 seconds...`, 'warning');
                     await delay(3000);
-                    // Try to get user_id by sign-in if user already exists
-                    userId = await getUserIdByEmail(user.email, user.pass);
-                    if (!userId) {
-                        addLog(`✗ Failed: ${user.email} - ${authError.message}`, 'error');
-                        addLog(`   Suggestion: Wait 60 minutes or disable email confirmation in Supabase Auth settings.`, 'warning');
-                        failCount++;
-                        continue;
-                    }
+                    // User exists but unconfirmed - we'll confirm them in profile step
+                    addLog(`⚠️  User already in auth system.`, 'warning');
                 } else if (authError.message.includes('already registered') || authError.message.includes('unique')) {
-                    addLog(`⚠️  Auth user exists. Retrieving user_id...`, 'warning');
-                    userId = await getUserIdByEmail(user.email, user.pass);
-                    if (!userId) {
-                        addLog(`✗ Could not retrieve user_id for ${user.email}. May need email confirmation.`, 'error');
-                        failCount++;
-                        continue;
-                    }
+                    addLog(`⚠️  Auth user exists. Will link profile if missing.`, 'warning');
                 } else {
                     addLog(`✗ Auth error for ${user.email}: ${authError.message}`, 'error');
                     failCount++;
@@ -169,8 +175,27 @@ const Setup = () => {
             } else if (authData?.user) {
                 userId = authData.user.id;
                 addLog(`✓ Created auth user: ${user.email}`, 'success');
-                // Sign out immediately to avoid conflicts
                 await supabase.auth.signOut();
+            }
+
+            // Step 2B: If we don't have userId yet, try to retrieve it
+            if (!userId) {
+                try {
+                    // Try to get from auth.users via query (in case user exists but unconfirmed)
+                    const { data: users, error: queryError } = await supabase
+                        .from('auth.users')
+                        .select('id')
+                        .eq('email', user.email)
+                        .single();
+                    
+                    if (users?.id) {
+                        userId = users.id;
+                        addLog(`ℹ️  Found existing auth user (unconfirmed). Linking profile...`, 'info');
+                    }
+                } catch (e) {
+                    // Query might not work due to RLS
+                    addLog(`ℹ️  Could not query auth.users directly.`, 'info');
+                }
             }
 
             if (!userId) {
@@ -179,7 +204,15 @@ const Setup = () => {
                 continue;
             }
 
-            // Step 3: Insert into profile table (with safe column handling)
+            // Step 3: Auto-confirm email for admin seeding (allows login)
+            const confirmResult = await confirmAuthEmail(userId);
+            if (confirmResult) {
+                addLog(`✓ Email confirmed for ${user.email}`, 'success');
+            } else {
+                addLog(`⚠️  Could not auto-confirm email. May need manual confirmation.`, 'warning');
+            }
+
+            // Step 4: Insert into profile table (with safe column handling)
             let insertError = null;
             const baseProfile = {
                 user_id: userId,
@@ -192,7 +225,7 @@ const Setup = () => {
                 if (user.type === 'admin') {
                     const { error } = await supabase.from('admin_users').upsert({
                         ...baseProfile,
-                        role: user.role,
+                        role: 'admin',  // Force role = 'admin' for admin users
                         status: 'Active'
                     }, { onConflict: 'user_id' });
                     insertError = error;
@@ -204,14 +237,12 @@ const Setup = () => {
                     }, { onConflict: 'user_id' });
                     insertError = error;
                 } else if (user.type === 'patient') {
-                    // Try with onConflict first, fallback to direct insert
                     let result = await supabase.from('patients').upsert({
                         ...baseProfile,
                         created_at: new Date()
                     }, { onConflict: 'user_id' });
                     
                     if (result.error && result.error.message.includes('no unique or exclusion constraint')) {
-                        // Fallback: try direct insert
                         result = await supabase.from('patients').insert({
                             ...baseProfile,
                             created_at: new Date()
@@ -226,10 +257,7 @@ const Setup = () => {
             if (insertError) {
                 addLog(`✗ Profile creation failed for ${user.email}: ${insertError.message}`, 'error');
                 if (insertError.message.includes('column')) {
-                    addLog(`   Schema mismatch detected. Check table structure.`, 'warning');
-                }
-                if (insertError.message.includes('foreign key') || insertError.message.includes('constraint')) {
-                    addLog(`   FK constraint error. Verify auth.users entry exists.`, 'warning');
+                    addLog(`   Tip: Missing column - schema may differ. Check table structure.`, 'warning');
                 }
                 failCount++;
             } else {
@@ -238,9 +266,9 @@ const Setup = () => {
                 createdCreds.push(user);
             }
 
-            // Rate limit protection: wait between users
+            // Rate limit protection
             if (i < usersToCreate.length - 1) {
-                await delay(500); // 500ms between each user
+                await delay(500);
             }
         }
 
