@@ -129,8 +129,7 @@ const Setup = () => {
                     password_hash: hash,
                     full_name: user.name,
                     role: user.role,
-                    status: 'Active',
-                    can_change_password: true
+                    status: 'Active'
                 }, { onConflict: 'email' });
                 insertError = error;
             } else if (user.type === 'staff') {
