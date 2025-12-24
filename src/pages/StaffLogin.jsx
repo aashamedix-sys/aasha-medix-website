@@ -22,12 +22,22 @@ const StaffLogin = () => {
     setLoading(true);
 
     try {
-      const { error: signInError } = await signIn({ email, password });
+      // Sign in with correct parameters (email, password - not object)
+      const { data, error: signInError } = await signIn(email, password);
       if (signInError) throw signInError;
+      
+      if (!data?.user?.id) {
+        throw new Error('Login failed. User ID not obtained.');
+      }
+
+      // Small delay to ensure session is set
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       navigate('/staff');
     } catch (err) {
-      console.error(err);
-      setError(err.message === 'Invalid login credentials' ? 'Invalid credentials.' : err.message);
+      console.error('Staff login error:', err);
+      const errorMsg = err.message === 'Invalid login credentials' ? 'Invalid credentials.' : err.message;
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

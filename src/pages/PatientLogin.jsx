@@ -29,11 +29,19 @@ const PatientLogin = () => {
     setLoading(true);
 
     try {
-      const { error: signInError } = await signIn(email, password);
+      const { data, error: signInError } = await signIn(email, password);
       if (signInError) throw signInError;
+      
+      if (!data?.user?.id) {
+        throw new Error('Login failed. User ID not obtained.');
+      }
+
+      // Small delay to ensure session is set
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       navigate('/patient');
     } catch (err) {
-      console.error(err);
+      console.error('Patient login error:', err);
       setError(err.message === 'Invalid login credentials' ? 'Invalid email or password.' : err.message);
     } finally {
       setLoading(false);

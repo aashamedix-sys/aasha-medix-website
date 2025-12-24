@@ -22,12 +22,21 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const { error: signInError } = await signIn({ email, password });
+      // Sign in with correct parameters (email, password - not object)
+      const { data, error: signInError } = await signIn(email, password);
       if (signInError) throw signInError;
+      
+      if (!data?.user?.id) {
+        throw new Error('Login failed. User ID not obtained.');
+      }
+
+      // Small delay to ensure session is set
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       navigate('/admin/dashboard');
     } catch (err) {
-      console.error(err);
-      setError('Access Denied. Invalid credentials or insufficient permissions.');
+      console.error('Admin login error:', err);
+      setError(err.message || 'Access Denied. Invalid credentials or insufficient permissions.');
     } finally {
       setLoading(false);
     }
