@@ -50,7 +50,11 @@ const DoctorBooking = () => {
     const fetchDoctors = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase.from('doctors').select('*').eq('specialty', selectedSpecialty).eq('active', true);
+            const { data, error } = await supabase
+               .from('doctors')
+               .select('*')
+               .eq('specialty', selectedSpecialty)
+               .eq('is_available', true);
         if (error) throw error;
         setDoctors(data || []);
       } catch (err) {

@@ -27,7 +27,7 @@ const DashboardContent = () => {
                 supabase.from('bookings').select('total_amount', { count: 'exact' }),
                 supabase.from('doctor_bookings').select('consultation_fee', { count: 'exact' }),
                 supabase.from('leads').select('*', { count: 'exact', head: true }),
-                supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('active', true)
+                supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('is_available', true)
             ]);
 
             // Safely extract data

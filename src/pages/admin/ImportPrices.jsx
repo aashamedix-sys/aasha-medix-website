@@ -45,18 +45,18 @@ export default function ImportPrices() {
   const [status, setStatus] = useState({ loading: false, message: '', error: '' });
 
   const upsertTests = async (rows) => {
-    // Map CSV to Supabase columns
+    // Map CSV to Supabase columns (align with DB schema)
     const payload = rows.map(r => ({
-      code: r.code || null,
-      name: r.name || null,
+      id: r.code || (r.id || null),
+      test_name: r.name || r.test_name || null,
       category: r.category || null,
+      price: r.price ? Number(r.price) : null,
       mrp: r.mrp ? Number(r.mrp) : null,
-      sample_type: r.sample_type || null,
-      tat: r.tat || null,
-      is_active: String(r.is_active).toLowerCase() === 'true',
       description: r.description || null,
-    })).filter(x => x.name);
-    const { error } = await supabase.from('tests').upsert(payload, { onConflict: 'code' });
+      status: String(r.is_active).toLowerCase() === 'true' ? 'active' : 'inactive',
+    }))
+    .filter(x => x.id && x.test_name);
+    const { error } = await supabase.from('tests').upsert(payload, { onConflict: 'id' });
     if (error) throw error;
     return payload.length;
   };

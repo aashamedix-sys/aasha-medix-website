@@ -28,7 +28,11 @@ const BookDiagnosticTests = () => {
   const fetchTests = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('tests').select('*').eq('is_active', true).order('name', { ascending: true });
+      const { data, error } = await supabase
+        .from('tests')
+        .select('*')
+        .eq('status', 'active')
+        .order('test_name', { ascending: true });
       if (error) throw error;
       setAllTests(data || []);
       

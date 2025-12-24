@@ -9,6 +9,20 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ========================================
+-- GLOBAL POLICY CLEANUP (drop all existing public policies)
+-- ========================================
+DO $$ DECLARE r RECORD;
+BEGIN
+    FOR r IN (
+        SELECT policyname, tablename
+        FROM pg_policies
+        WHERE schemaname = 'public'
+    ) LOOP
+        EXECUTE 'DROP POLICY IF EXISTS "' || r.policyname || '" ON public.' || r.tablename;
+    END LOOP;
+END $$;
+
+-- ========================================
 -- 1️⃣ DOCTORS TABLE
 -- ========================================
 CREATE TABLE IF NOT EXISTS public.doctors (
@@ -25,6 +39,28 @@ CREATE TABLE IF NOT EXISTS public.doctors (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Ensure doctors columns exist (repair if partially created)
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS specialty TEXT;
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS qualification TEXT;
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS experience_years INTEGER;
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS fee NUMERIC(10, 2);
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS is_available BOOLEAN DEFAULT true;
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE public.doctors
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 
 -- Add index for faster queries
 CREATE INDEX IF NOT EXISTS idx_doctors_specialty ON public.doctors(specialty);
@@ -48,6 +84,20 @@ CREATE TABLE IF NOT EXISTS public.tests (
 -- Backfill compatibility: ensure status column exists if table already existed
 ALTER TABLE public.tests
     ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active';
+ALTER TABLE public.tests
+    ADD COLUMN IF NOT EXISTS test_name TEXT;
+ALTER TABLE public.tests
+    ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE public.tests
+    ADD COLUMN IF NOT EXISTS price NUMERIC(10,2);
+ALTER TABLE public.tests
+    ADD COLUMN IF NOT EXISTS mrp NUMERIC(10,2);
+ALTER TABLE public.tests
+    ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.tests
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE public.tests
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 
 -- Add indexes
 CREATE INDEX IF NOT EXISTS idx_tests_category ON public.tests(category);
@@ -234,90 +284,83 @@ ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
 -- ========================================
 -- DOCTORS TABLE POLICIES
 -- ========================================
+-- Create policies safely with IF NOT EXISTS via DO blocks
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies WHERE schemaname='public' AND policyname='Admin full access to doctors'
+    ) THEN
+        CREATE POLICY "Admin full access to doctors"
+        ON public.doctors FOR ALL
+        USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    END IF;
+END $$;
 
--- Admin: Full access
-CREATE POLICY "Admin full access to doctors"
-ON public.doctors
-FOR ALL
-USING (
-    EXISTS (
-        SELECT 1 FROM public.admin_users
-        WHERE user_id = auth.uid()
-    )
-);
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies WHERE schemaname='public' AND policyname='Staff can read and modify doctors'
+    ) THEN
+        CREATE POLICY "Staff can read and modify doctors"
+        ON public.doctors FOR ALL
+        USING (EXISTS (SELECT 1 FROM public.staff WHERE user_id = auth.uid()));
+    END IF;
+END $$;
 
--- Staff: Read and modify
-CREATE POLICY "Staff can read and modify doctors"
-ON public.doctors
-FOR ALL
-USING (
-    EXISTS (
-        SELECT 1 FROM public.staff
-        WHERE user_id = auth.uid()
-    )
-);
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies WHERE schemaname='public' AND policyname='Patients can view available doctors'
+    ) THEN
+        CREATE POLICY "Patients can view available doctors"
+        ON public.doctors FOR SELECT
+        USING (is_available = true AND EXISTS (
+            SELECT 1 FROM public.patients WHERE user_id = auth.uid()
+        ));
+    END IF;
+END $$;
 
--- Patients: Read only (for booking)
-CREATE POLICY "Patients can view available doctors"
-ON public.doctors
-FOR SELECT
-USING (
-    is_available = true
-    AND EXISTS (
-        SELECT 1 FROM public.patients
-        WHERE user_id = auth.uid()
-    )
-);
-
--- Public: Read available doctors (for unauthenticated browsing)
-CREATE POLICY "Public can view available doctors"
-ON public.doctors
-FOR SELECT
-USING (is_available = true);
+DO $$ BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies WHERE schemaname='public' AND policyname='Public can view available doctors'
+    ) THEN
+        CREATE POLICY "Public can view available doctors"
+        ON public.doctors FOR SELECT USING (is_available = true);
+    END IF;
+END $$;
 
 -- ========================================
 -- TESTS TABLE POLICIES
 -- ========================================
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND policyname='Admin full access to tests') THEN
+        CREATE POLICY "Admin full access to tests"
+        ON public.tests FOR ALL
+        USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    END IF;
+END $$;
 
--- Admin: Full access
-CREATE POLICY "Admin full access to tests"
-ON public.tests
-FOR ALL
-USING (
-    EXISTS (
-        SELECT 1 FROM public.admin_users
-        WHERE user_id = auth.uid()
-    )
-);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND policyname='Staff can read and modify tests') THEN
+        CREATE POLICY "Staff can read and modify tests"
+        ON public.tests FOR ALL
+        USING (EXISTS (SELECT 1 FROM public.staff WHERE user_id = auth.uid()));
+    END IF;
+END $$;
 
--- Staff: Read and modify
-CREATE POLICY "Staff can read and modify tests"
-ON public.tests
-FOR ALL
-USING (
-    EXISTS (
-        SELECT 1 FROM public.staff
-        WHERE user_id = auth.uid()
-    )
-);
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND policyname='Patients can view active tests') THEN
+        CREATE POLICY "Patients can view active tests"
+        ON public.tests FOR SELECT
+        USING (status = 'active' AND EXISTS (
+            SELECT 1 FROM public.patients WHERE user_id = auth.uid()
+        ));
+    END IF;
+END $$;
 
--- Patients: Read only
-CREATE POLICY "Patients can view active tests"
-ON public.tests
-FOR SELECT
-USING (
-    status = 'active'
-    AND EXISTS (
-        SELECT 1 FROM public.patients
-        WHERE user_id = auth.uid()
-    )
-);
-
--- Public: Read active tests
-CREATE POLICY "Public can view active tests"
-ON public.tests
-FOR SELECT
-USING (status = 'active');
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND policyname='Public can view active tests') THEN
+        CREATE POLICY "Public can view active tests"
+        ON public.tests FOR SELECT USING (status = 'active');
+    END IF;
+END $$;
 
 -- ========================================
 -- BOOKINGS TABLE POLICIES
@@ -552,14 +595,10 @@ WHERE NOT EXISTS (SELECT 1 FROM public.doctors LIMIT 1);
 
 -- Insert sample tests (if none exist)
 INSERT INTO public.tests (id, test_name, category, price, mrp, description, status)
-SELECT * FROM (VALUES
-    ('CBC', 'Complete Blood Count', 'Pathology', 300.00, 500.00, 'Measures different components of blood', 'active'),
-    ('LFT', 'Liver Function Test', 'Pathology', 400.00, 600.00, 'Assesses liver health', 'active'),
-    ('KFT', 'Kidney Function Test', 'Pathology', 400.00, 600.00, 'Evaluates kidney function', 'active'),
-    ('XRAY', 'X-Ray Chest', 'Radiology', 250.00, 400.00, 'Chest X-Ray imaging', 'active'),
-    ('ECG', 'Electrocardiogram', 'Cardiology', 200.00, 350.00, 'Heart electrical activity test', 'active')
-) AS v(id, test_name, category, price, mrp, description, status)
-WHERE NOT EXISTS (SELECT 1 FROM public.tests LIMIT 1);
+VALUES 
+('CBC','Complete Blood Count','Pathology',300,500,'Blood analysis','active'),
+('LFT','Liver Function Test','Pathology',400,600,'Liver profile','active')
+ON CONFLICT (id) DO NOTHING;
 
 -- ========================================
 -- GRANT PERMISSIONS
