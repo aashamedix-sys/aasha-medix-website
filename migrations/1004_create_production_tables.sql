@@ -2,52 +2,11 @@
 -- AASHA MEDIX PRODUCTION DATABASE SCHEMA  
 -- Migration 1004: Complete Backend Tables
 -- Date: December 25, 2025
--- VERSION: 1.1 (Fixed - with policy cleanup)
+-- VERSION: 1.2 (Fixed - policies drop after tables exist)
 -- ========================================
 
 -- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- ========================================
--- CLEANUP: Drop existing policies if any
--- ========================================
--- Doctors policies
-DROP POLICY IF EXISTS "Admin full access to doctors" ON public.doctors;
-DROP POLICY IF EXISTS "Staff can read and modify doctors" ON public.doctors;
-DROP POLICY IF EXISTS "Patients can view available doctors" ON public.doctors;
-DROP POLICY IF EXISTS "Public can view available doctors" ON public.doctors;
-
--- Tests policies
-DROP POLICY IF EXISTS "Admin full access to tests" ON public.tests;
-DROP POLICY IF EXISTS "Staff can read and modify tests" ON public.tests;
-DROP POLICY IF EXISTS "Patients can view active tests" ON public.tests;
-DROP POLICY IF EXISTS "Public can view active tests" ON public.tests;
-
--- Bookings policies
-DROP POLICY IF EXISTS "Admin full access to bookings" ON public.bookings;
-DROP POLICY IF EXISTS "Staff can manage all bookings" ON public.bookings;
-DROP POLICY IF EXISTS "Patients can view own bookings" ON public.bookings;
-DROP POLICY IF EXISTS "Patients can create own bookings" ON public.bookings;
-DROP POLICY IF EXISTS "Patients can update own pending bookings" ON public.bookings;
-
--- Doctor bookings policies
-DROP POLICY IF EXISTS "Admin full access to doctor_bookings" ON public.doctor_bookings;
-DROP POLICY IF EXISTS "Staff can manage doctor bookings" ON public.doctor_bookings;
-DROP POLICY IF EXISTS "Patients can view own doctor bookings" ON public.doctor_bookings;
-DROP POLICY IF EXISTS "Patients can create doctor bookings" ON public.doctor_bookings;
-
--- Leads policies
-DROP POLICY IF EXISTS "Admin full access to leads" ON public.leads;
-DROP POLICY IF EXISTS "Staff can manage leads" ON public.leads;
-
--- Analytics policies
-DROP POLICY IF EXISTS "Admin full access to analytics" ON public.analytics;
-DROP POLICY IF EXISTS "Staff can view analytics" ON public.analytics;
-
--- Reports policies
-DROP POLICY IF EXISTS "Admin full access to reports" ON public.reports;
-DROP POLICY IF EXISTS "Staff can manage reports" ON public.reports;
-DROP POLICY IF EXISTS "Patients can view own reports" ON public.reports;
 
 -- ========================================
 -- 1️⃣ DOCTORS TABLE
@@ -230,6 +189,38 @@ CREATE INDEX IF NOT EXISTS idx_reports_status ON public.reports(status);
 -- ========================================
 -- RLS POLICIES: ENABLE ROW LEVEL SECURITY
 -- ========================================
+
+-- Clean up existing policies first (now that tables exist)
+DROP POLICY IF EXISTS "Admin full access to doctors" ON public.doctors;
+DROP POLICY IF EXISTS "Staff can read and modify doctors" ON public.doctors;
+DROP POLICY IF EXISTS "Patients can view available doctors" ON public.doctors;
+DROP POLICY IF EXISTS "Public can view available doctors" ON public.doctors;
+
+DROP POLICY IF EXISTS "Admin full access to tests" ON public.tests;
+DROP POLICY IF EXISTS "Staff can read and modify tests" ON public.tests;
+DROP POLICY IF EXISTS "Patients can view active tests" ON public.tests;
+DROP POLICY IF EXISTS "Public can view active tests" ON public.tests;
+
+DROP POLICY IF EXISTS "Admin full access to bookings" ON public.bookings;
+DROP POLICY IF EXISTS "Staff can manage all bookings" ON public.bookings;
+DROP POLICY IF EXISTS "Patients can view own bookings" ON public.bookings;
+DROP POLICY IF EXISTS "Patients can create own bookings" ON public.bookings;
+DROP POLICY IF EXISTS "Patients can update own pending bookings" ON public.bookings;
+
+DROP POLICY IF EXISTS "Admin full access to doctor_bookings" ON public.doctor_bookings;
+DROP POLICY IF EXISTS "Staff can manage doctor bookings" ON public.doctor_bookings;
+DROP POLICY IF EXISTS "Patients can view own doctor bookings" ON public.doctor_bookings;
+DROP POLICY IF EXISTS "Patients can create doctor bookings" ON public.doctor_bookings;
+
+DROP POLICY IF EXISTS "Admin full access to leads" ON public.leads;
+DROP POLICY IF EXISTS "Staff can manage leads" ON public.leads;
+
+DROP POLICY IF EXISTS "Admin full access to analytics" ON public.analytics;
+DROP POLICY IF EXISTS "Staff can view analytics" ON public.analytics;
+
+DROP POLICY IF EXISTS "Admin full access to reports" ON public.reports;
+DROP POLICY IF EXISTS "Staff can manage reports" ON public.reports;
+DROP POLICY IF EXISTS "Patients can view own reports" ON public.reports;
 
 -- Enable RLS on all tables
 ALTER TABLE public.doctors ENABLE ROW LEVEL SECURITY;
