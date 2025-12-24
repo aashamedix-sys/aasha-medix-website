@@ -99,6 +99,19 @@ ALTER TABLE public.tests
 ALTER TABLE public.tests
     ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
 
+-- Ensure tests.id is TEXT (repair if previously BIGINT/UUID)
+DO $$
+DECLARE v_type text;
+BEGIN
+    SELECT data_type INTO v_type
+    FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'tests' AND column_name = 'id';
+
+    IF v_type IS NOT NULL AND v_type <> 'text' THEN
+        ALTER TABLE public.tests ALTER COLUMN id TYPE TEXT USING id::text;
+    END IF;
+END $$;
+
 -- Add indexes
 CREATE INDEX IF NOT EXISTS idx_tests_category ON public.tests(category);
 CREATE INDEX IF NOT EXISTS idx_tests_status ON public.tests(status);
