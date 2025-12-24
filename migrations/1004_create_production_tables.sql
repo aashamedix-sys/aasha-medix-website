@@ -86,6 +86,10 @@ CREATE TABLE IF NOT EXISTS public.tests (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Backfill compatibility: ensure status column exists if table already existed
+ALTER TABLE public.tests
+    ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active';
+
 -- Add indexes
 CREATE INDEX IF NOT EXISTS idx_tests_category ON public.tests(category);
 CREATE INDEX IF NOT EXISTS idx_tests_status ON public.tests(status);
