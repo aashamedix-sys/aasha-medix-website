@@ -1,6 +1,6 @@
 
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import React, { useEffect, Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TrustDivider from '@/components/TrustDivider';
@@ -48,10 +48,32 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import Setup from '@/pages/Setup';
 import PriceList from '@/pages/PriceList';
 
+// Lazy load admin sub-pages
+const ManageDoctors = lazy(() => import('@/pages/admin/ManageDoctors'));
+const ManageTests = lazy(() => import('@/pages/admin/ManageTests'));
+const ViewBookings = lazy(() => import('@/pages/admin/ViewBookings'));
+const StaffManagement = lazy(() => import('@/pages/admin/StaffManagement'));
+const ContentManager = lazy(() => import('@/pages/admin/ContentManager'));
+const Analytics = lazy(() => import('@/pages/admin/Analytics'));
+const AdminSettings = lazy(() => import('@/pages/admin/AdminSettings'));
+const ImportPrices = lazy(() => import('@/pages/admin/ImportPrices'));
+const LeadManagement = lazy(() => import('@/pages/admin/LeadManagement'));
+
 import { Toaster } from '@/components/ui/toaster';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import FloatingActions from '@/components/FloatingActions';
 import AashaDostChatbot from '@/components/AashaDostChatbot';
+
+// Loading fallback component
+const LoadingScreen = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50">
+    <div className="flex flex-col items-center gap-4 bg-white p-8 rounded-2xl shadow-xl">
+      <div className="w-16 h-16 border-4 border-[#0FA958] border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-gray-700 font-semibold text-lg">Loading...</p>
+      <p className="text-gray-500 text-sm">Please wait</p>
+    </div>
+  </div>
+);
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, userRole, loading } = useAuth();
@@ -111,7 +133,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   }
   
   console.log('[ProtectedRoute] ✓ Access granted');
-  return children;
+  // CRITICAL: Return Outlet for nested routes OR children if provided
+  return children || <Outlet />;
 };
 
 const ScrollToTop = () => {
@@ -182,18 +205,20 @@ const AppContent = () => {
 
           <Route path="/staff/*" element={<ProtectedRoute allowedRoles={['staff']}><StaffDashboard /></ProtectedRoute>} />
           
-          <Route path="/admin/*" element={<ProtectedRoute allowedRoles={['admin']}><Routes>
-              <Route path="/" element={<AdminDashboard />} />
-              <Route path="/dashboard" element={<AdminDashboard />} />
-              {/* Admin Import Price List UI */}
-              <Route path="/import-prices" element={<React.Suspense fallback={<div className="p-8">Loading…</div>}>
-                {/** lazy import avoids initial bundle weight */}
-                {(() => {
-                  const ImportPrices = React.lazy(() => import('@/pages/admin/ImportPrices'));
-                  return <ImportPrices />;
-                })()}
-              </React.Suspense>} />
-          </Routes></ProtectedRoute>} />
+          {/* Admin Routes with nested structure */}
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']} />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="doctors" element={<Suspense fallback={<LoadingScreen />}><ManageDoctors /></Suspense>} />
+            <Route path="tests" element={<Suspense fallback={<LoadingScreen />}><ManageTests /></Suspense>} />
+            <Route path="bookings" element={<Suspense fallback={<LoadingScreen />}><ViewBookings /></Suspense>} />
+            <Route path="staff" element={<Suspense fallback={<LoadingScreen />}><StaffManagement /></Suspense>} />
+            <Route path="leads" element={<Suspense fallback={<LoadingScreen />}><LeadManagement /></Suspense>} />
+            <Route path="content" element={<Suspense fallback={<LoadingScreen />}><ContentManager /></Suspense>} />
+            <Route path="analytics" element={<Suspense fallback={<LoadingScreen />}><Analytics /></Suspense>} />
+            <Route path="settings" element={<Suspense fallback={<LoadingScreen />}><AdminSettings /></Suspense>} />
+            <Route path="import-prices" element={<Suspense fallback={<LoadingScreen />}><ImportPrices /></Suspense>} />
+          </Route>
 
         </Routes>
       </main>
