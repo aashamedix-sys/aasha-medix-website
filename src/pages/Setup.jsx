@@ -204,11 +204,20 @@ const Setup = () => {
                     }, { onConflict: 'user_id' });
                     insertError = error;
                 } else if (user.type === 'patient') {
-                    const { error } = await supabase.from('patients').upsert({
+                    // Try with onConflict first, fallback to direct insert
+                    let result = await supabase.from('patients').upsert({
                         ...baseProfile,
                         created_at: new Date()
                     }, { onConflict: 'user_id' });
-                    insertError = error;
+                    
+                    if (result.error && result.error.message.includes('no unique or exclusion constraint')) {
+                        // Fallback: try direct insert
+                        result = await supabase.from('patients').insert({
+                            ...baseProfile,
+                            created_at: new Date()
+                        });
+                    }
+                    insertError = result.error;
                 }
             } catch (e) {
                 insertError = e;
