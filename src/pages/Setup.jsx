@@ -73,100 +73,187 @@ const Setup = () => {
     doc.save("aasha-medix-credentials.pdf");
   };
 
+  // Helper: wait between user creations to avoid rate limits
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  // Helper: Check if profile exists in DB
+  const checkProfileExists = async (email, type) => {
+    try {
+      const table = type === 'admin' ? 'admin_users' : type === 'staff' ? 'staff' : 'patients';
+      const { data, error } = await supabase.from(table).select('id, user_id').eq('email', email).single();
+      return { exists: !!data && !error, userId: data?.user_id };
+    } catch (e) {
+      return { exists: false, userId: null };
+    }
+  };
+
+  // Helper: Try to get user_id from auth.users by email lookup via sign-in attempt
+  const getUserIdByEmail = async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (data?.user?.id) {
+        // Sign out immediately to avoid session conflicts
+        await supabase.auth.signOut();
+        return data.user.id;
+      }
+    } catch (e) {
+      // Ignore errors
+    }
+    return null;
+  };
+
   const runSetup = async () => {
     if (setupComplete) {
-        if (!window.confirm("System appears to be already initialized. Re-running might cause duplicate errors. Continue?")) return;
+        if (!window.confirm("System already initialized. Re-run to sync missing users?")) return;
     }
 
     setLoading(true);
     setLogs([]);
-    addLog("Starting System Initialization...", 'info');
+    addLog("🚀 Starting System Initialization (Idempotent Mode)...", 'info');
+    addLog("ℹ️  Existing users will be skipped, missing users will be created.", 'info');
 
     try {
         const createdCreds = [];
+        let successCount = 0;
+        let skipCount = 0;
+        let failCount = 0;
 
-        for (const user of usersToCreate) {
-            addLog(`Processing user: ${user.email}...`, 'info');
+        for (let i = 0; i < usersToCreate.length; i++) {
+            const user = usersToCreate[i];
+            addLog(`\n[${i + 1}/${usersToCreate.length}] Processing: ${user.email}`, 'info');
             
+            // Step 1: Check if profile already exists
+            const { exists, userId: existingUserId } = await checkProfileExists(user.email, user.type);
+            if (exists && existingUserId) {
+                addLog(`✓ Profile exists for ${user.email} (user_id: ${existingUserId.slice(0, 8)}...). Skipping.`, 'success');
+                skipCount++;
+                createdCreds.push(user); // Include in credentials list
+                await delay(200); // Small delay before next user
+                continue;
+            }
+
             const salt = bcrypt.genSaltSync(10);
             const hash = bcrypt.hashSync(user.pass, salt);
 
-            // 1. Auth Sign Up
+            // Step 2: Try to create or retrieve auth user
             let userId = null;
+
+            // Try sign-up first
             const { data: authData, error: authError } = await signUp(user.email, user.pass);
 
             if (authError) {
-                if (authError.message.includes('already registered') || authError.message.includes('unique constraint')) {
-                    addLog(`User ${user.email} exists in Auth. Attempting to link...`, 'warning');
-                    // Try to get ID by signing in
-                    const { data: loginData } = await supabase.auth.signInWithPassword({ email: user.email, password: user.pass });
-                    if (loginData?.user) {
-                        userId = loginData.user.id;
-                    } else {
-                         addLog(`Could not login as ${user.email}. Email might not be confirmed yet.`, 'warning');
+                if (authError.message.toLowerCase().includes('rate limit')) {
+                    addLog(`⚠️  Rate limit hit. Waiting 3 seconds...`, 'warning');
+                    await delay(3000);
+                    // Try to get user_id by sign-in if user already exists
+                    userId = await getUserIdByEmail(user.email, user.pass);
+                    if (!userId) {
+                        addLog(`✗ Failed: ${user.email} - ${authError.message}`, 'error');
+                        addLog(`   Suggestion: Wait 60 minutes or disable email confirmation in Supabase Auth settings.`, 'warning');
+                        failCount++;
+                        continue;
+                    }
+                } else if (authError.message.includes('already registered') || authError.message.includes('unique')) {
+                    addLog(`⚠️  Auth user exists. Retrieving user_id...`, 'warning');
+                    userId = await getUserIdByEmail(user.email, user.pass);
+                    if (!userId) {
+                        addLog(`✗ Could not retrieve user_id for ${user.email}. May need email confirmation.`, 'error');
+                        failCount++;
+                        continue;
                     }
                 } else {
-                    addLog(`Failed to create auth user ${user.email}: ${authError.message}`, 'error');
+                    addLog(`✗ Auth error for ${user.email}: ${authError.message}`, 'error');
+                    failCount++;
                     continue;
                 }
             } else if (authData?.user) {
                 userId = authData.user.id;
-                addLog(`Created Auth User: ${user.email}`, 'success');
+                addLog(`✓ Created auth user: ${user.email}`, 'success');
+                // Sign out immediately to avoid conflicts
+                await supabase.auth.signOut();
             }
 
-            // If we still don't have userId, we can't proceed with this user
             if (!userId) {
-                addLog(`Skipping public table insert for ${user.email} - User ID missing. Run SQL migration to confirm emails.`, 'error');
+                addLog(`✗ No user_id obtained for ${user.email}. Skipping profile creation.`, 'error');
+                failCount++;
                 continue;
             }
 
-            // 2. Insert into Public Tables
+            // Step 3: Insert into profile table (with safe column handling)
             let insertError = null;
-            if (user.type === 'admin') {
-                const { error } = await supabase.from('admin_users').upsert({
-                    user_id: userId,
-                    email: user.email,
-                    password_hash: hash,
-                    full_name: user.name,
-                    role: user.role,
-                    status: 'Active'
-                }, { onConflict: 'email' });
-                insertError = error;
-            } else if (user.type === 'staff') {
-                const { error } = await supabase.from('staff').upsert({
-                    user_id: userId,
-                    email: user.email,
-                    password_hash: hash,
-                    full_name: user.name,
-                    role: user.role,
-                    status: 'Active'
-                }, { onConflict: 'email' });
-                insertError = error;
-            } else if (user.type === 'patient') {
-                const { error } = await supabase.from('patients').upsert({
-                    user_id: userId,
-                    email: user.email,
-                    password_hash: hash,
-                    full_name: user.name,
-                    created_at: new Date()
-                }, { onConflict: 'email' });
-                insertError = error;
+            const baseProfile = {
+                user_id: userId,
+                email: user.email,
+                password_hash: hash,
+                full_name: user.name,
+            };
+
+            try {
+                if (user.type === 'admin') {
+                    const { error } = await supabase.from('admin_users').upsert({
+                        ...baseProfile,
+                        role: user.role,
+                        status: 'Active'
+                    }, { onConflict: 'user_id' });
+                    insertError = error;
+                } else if (user.type === 'staff') {
+                    const { error } = await supabase.from('staff').upsert({
+                        ...baseProfile,
+                        role: user.role,
+                        status: 'Active'
+                    }, { onConflict: 'user_id' });
+                    insertError = error;
+                } else if (user.type === 'patient') {
+                    const { error } = await supabase.from('patients').upsert({
+                        ...baseProfile,
+                        created_at: new Date()
+                    }, { onConflict: 'user_id' });
+                    insertError = error;
+                }
+            } catch (e) {
+                insertError = e;
             }
 
             if (insertError) {
-                addLog(`Failed to link profile for ${user.email}: ${insertError.message}`, 'error');
+                addLog(`✗ Profile creation failed for ${user.email}: ${insertError.message}`, 'error');
+                if (insertError.message.includes('column')) {
+                    addLog(`   Schema mismatch detected. Check table structure.`, 'warning');
+                }
+                if (insertError.message.includes('foreign key') || insertError.message.includes('constraint')) {
+                    addLog(`   FK constraint error. Verify auth.users entry exists.`, 'warning');
+                }
+                failCount++;
             } else {
-                addLog(`Linked profile for ${user.name}`, 'success');
+                addLog(`✓ Profile linked: ${user.name} (${user.type})`, 'success');
+                successCount++;
                 createdCreds.push(user);
+            }
+
+            // Rate limit protection: wait between users
+            if (i < usersToCreate.length - 1) {
+                await delay(500); // 500ms between each user
             }
         }
 
         setCredentials(createdCreds);
         setSetupComplete(true);
-        addLog("System Initialization Completed!", 'success');
+        
+        addLog(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━`, 'info');
+        addLog(`📊 Setup Complete!`, 'success');
+        addLog(`   ✓ Successful: ${successCount}`, 'success');
+        addLog(`   ⊘ Skipped (existing): ${skipCount}`, 'warning');
+        addLog(`   ✗ Failed: ${failCount}`, failCount > 0 ? 'error' : 'info');
+        
+        if (failCount > 0) {
+            addLog(`\n💡 To fix failures:`, 'warning');
+            addLog(`   1. Disable "Confirm email" in Supabase Auth settings`, 'warning');
+            addLog(`   2. Run: ALTER TABLE admin_users/staff/patients DISABLE ROW LEVEL SECURITY;`, 'warning');
+            addLog(`   3. Re-run setup (it's safe - existing users will be skipped)`, 'warning');
+        }
 
     } catch (err) {
-        addLog(`CRITICAL ERROR: ${err.message}`, 'error');
+        addLog(`\n🔥 CRITICAL ERROR: ${err.message}`, 'error');
+        console.error('Setup error:', err);
     } finally {
         setLoading(false);
     }
