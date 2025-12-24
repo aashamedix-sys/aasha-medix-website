@@ -19,48 +19,95 @@ const PatientDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return;
-      setLoading(true);
+      try {
+        if (!user) {
+          setError('User not authenticated');
+          setLoading(false);
+          return;
+        }
 
-      const { data: patientData } = await supabase
-        .from('patients')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (patientData) {
-        setPatient(patientData);
-        
-        const { data: appointmentsData } = await supabase
-          .from('appointments')
-          .select('*')
-          .eq('patient_id', patientData.id)
-          .order('appointment_date', { ascending: false });
-        
-        const { data: reportsData } = await supabase
-          .from('reports')
-          .select('*')
-          .eq('patient_id', patientData.id)
-          .order('report_date', { ascending: false });
+        setLoading(true);
+        setError(null);
 
-        if (appointmentsData) setAppointments(appointmentsData);
-        if (reportsData) setReports(reportsData);
+        // Fetch patient profile
+        const { data: patientData, error: patientError } = await supabase
+          .from('patients')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (patientError && !patientError.message.includes('does not exist')) {
+          console.warn('Patient fetch error:', patientError);
+        }
+
+        if (patientData) {
+          setPatient(patientData);
+          
+          // Try to fetch appointments
+          try {
+            const { data: appointmentsData, error: appointError } = await supabase
+              .from('appointments')
+              .select('*')
+              .eq('patient_id', patientData.id)
+              .order('appointment_date', { ascending: false })
+              .limit(10);
+            
+            if (appointError && !appointError.message.includes('does not exist')) {
+              console.warn('Appointments error:', appointError);
+            }
+            if (appointmentsData) setAppointments(appointmentsData);
+          } catch (e) {
+            console.warn('Appointments table not available:', e);
+          }
+
+          // Try to fetch reports
+          try {
+            const { data: reportsData, error: reportError } = await supabase
+              .from('reports')
+              .select('*')
+              .eq('patient_id', patientData.id)
+              .order('report_date', { ascending: false })
+              .limit(10);
+            
+            if (reportError && !reportError.message.includes('does not exist')) {
+              console.warn('Reports error:', reportError);
+            }
+            if (reportsData) setReports(reportsData);
+          } catch (e) {
+            console.warn('Reports table not available:', e);
+          }
+        }
+
+        setLoading(false);
+      } catch (err) {
+        console.error('PatientDashboard error:', err);
+        setError(err.message || 'Failed to load dashboard');
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
-
+    
     fetchData();
   }, [user]);
   
   if (loading) return (
     <DashboardLayout title="Patient Portal">
-       <div className="flex items-center justify-center h-64">
+       <div className="flex flex-col items-center justify-center h-64 gap-4">
          <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+         <p className="text-gray-600 font-medium">Loading your dashboard...</p>
        </div>
+    </DashboardLayout>
+  );
+
+  if (error) return (
+    <DashboardLayout title="Patient Portal">
+      <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg">
+        <p className="font-semibold">Error: {error}</p>
+        <p className="text-sm mt-2">Some features may not be available. Please refresh the page.</p>
+      </div>
     </DashboardLayout>
   );
 

@@ -77,8 +77,26 @@ const DashboardContent = () => {
     { name: 'Sun', bookings: 10 },
   ];
 
+  if (loading) {
+    return (
+      <DashboardLayout role="admin" title="Admin Dashboard">
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+          <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 font-medium">Loading admin dashboard...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   if (error) {
-    return <div className="p-4 text-red-500 bg-red-50 rounded-lg">{error}</div>;
+    return (
+      <DashboardLayout role="admin" title="Admin Dashboard">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg">
+          <p className="font-semibold">⚠️ {error}</p>
+          <p className="text-sm mt-2">Dashboard is loading with limited data. Some features may not be available yet.</p>
+        </div>
+      </DashboardLayout>
+    );
   }
 
   return (

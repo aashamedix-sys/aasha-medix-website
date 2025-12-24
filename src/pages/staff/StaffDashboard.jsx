@@ -18,27 +18,55 @@ const StaffDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      
-      // Fetch appointments with patient details
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('*, patients(name, mobile, address)')
-        .order('appointment_date', { ascending: true });
-      
-      if (data) setAppointments(data);
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Fetch booking statistics
-      const bookingStats = await getBookingStats();
-      setStats(bookingStats);
+        // First verify user is loaded
+        if (!user) {
+          setError('User not authenticated');
+          setLoading(false);
+          return;
+        }
 
-      setLoading(false);
+        // Try to fetch appointments, but don't fail if table doesn't exist
+        try {
+          const { data, error: appointError } = await supabase
+            .from('appointments')
+            .select('*, patients(name, mobile, address)')
+            .order('appointment_date', { ascending: true })
+            .limit(10);
+          
+          if (appointError && !appointError.message.includes('does not exist')) {
+            console.warn('Appointments fetch error:', appointError);
+          }
+          if (data) setAppointments(data);
+        } catch (e) {
+          console.warn('Appointments table not available:', e);
+        }
+
+        // Try to fetch booking statistics
+        try {
+          const bookingStats = await getBookingStats();
+          setStats(bookingStats || {});
+        } catch (e) {
+          console.warn('Stats fetch error:', e);
+        }
+
+        setLoading(false);
+      } catch (err) {
+        console.error('StaffDashboard error:', err);
+        setError(err.message || 'Failed to load dashboard');
+        setLoading(false);
+      }
     };
+    
     fetchData();
-  }, []);
+  }, [user]);
 
   const handleStatusChange = async (id, newStatus) => {
     const { error } = await supabase
@@ -204,48 +232,64 @@ const StaffDashboard = () => {
 
   return (
     <DashboardLayout role="staff" title={`${userRole} Portal`}>
-      <Tabs defaultValue="queue" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6">
-          <TabsTrigger value="queue" className="flex items-center gap-2">
-            <ListTodo className="w-4 h-4" />
-            Booking Queue
-          </TabsTrigger>
-          <TabsTrigger value="approvals" className="flex items-center gap-2">
-            <CheckSquare className="w-4 h-4" />
-            Approvals
-          </TabsTrigger>
-          <TabsTrigger value="messages" className="flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            Messages
-          </TabsTrigger>
-          <TabsTrigger value="phlebotomist">
-            Phlebotomist
-          </TabsTrigger>
-          <TabsTrigger value="tech">
-            Lab Tech
-          </TabsTrigger>
-        </TabsList>
+      {loading && (
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 font-medium">Loading dashboard...</p>
+        </div>
+      )}
 
-        <TabsContent value="queue" className="space-y-6">
-          <StaffBookingQueue />
-        </TabsContent>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg mb-6">
+          <p className="font-semibold">Error: {error}</p>
+          <p className="text-sm mt-2">Some features may not be available. Please refresh the page.</p>
+        </div>
+      )}
 
-        <TabsContent value="approvals" className="space-y-6">
-          <ApprovalQueue />
-        </TabsContent>
+      {!loading && (
+        <Tabs defaultValue="queue" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsTrigger value="queue" className="flex items-center gap-2">
+              <ListTodo className="w-4 h-4" />
+              Booking Queue
+            </TabsTrigger>
+            <TabsTrigger value="approvals" className="flex items-center gap-2">
+              <CheckSquare className="w-4 h-4" />
+              Approvals
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" />
+              Messages
+            </TabsTrigger>
+            <TabsTrigger value="phlebotomist">
+              Phlebotomist
+            </TabsTrigger>
+            <TabsTrigger value="tech">
+              Lab Tech
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="messages" className="space-y-6">
-          <ChatList />
-        </TabsContent>
+          <TabsContent value="queue" className="space-y-6">
+            <StaffBookingQueue />
+          </TabsContent>
 
-        <TabsContent value="phlebotomist">
-          {renderPhlebotomistView()}
-        </TabsContent>
+          <TabsContent value="approvals" className="space-y-6">
+            <ApprovalQueue />
+          </TabsContent>
 
-        <TabsContent value="tech">
-          {renderLabTechView()}
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="messages" className="space-y-6">
+            <ChatList />
+          </TabsContent>
+
+          <TabsContent value="phlebotomist">
+            {renderPhlebotomistView()}
+          </TabsContent>
+
+          <TabsContent value="tech">
+            {renderLabTechView()}
+          </TabsContent>
+        </Tabs>
+      )}
     </DashboardLayout>
   );
 };
