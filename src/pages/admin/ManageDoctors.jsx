@@ -22,16 +22,15 @@ const ManageDoctorsContent = () => {
 
   // Form State
   const [formData, setFormData] = useState({
-    name: '',
+    full_name: '',
     specialty: '',
     qualification: '',
     experience_years: '',
-    consultation_fee: '',
+    fee: '',
     rating: '5.0',
     email: '',
     phone: '',
-    image_url: '',
-    active: true
+    is_available: true
   });
 
   const specialties = [
@@ -122,16 +121,15 @@ const ManageDoctorsContent = () => {
   const resetForm = () => {
     setCurrentDoctor(null);
     setFormData({
-      name: '',
+      full_name: '',
       specialty: '',
       qualification: '',
       experience_years: '',
-      consultation_fee: '',
+      fee: '',
       rating: '5.0',
       email: '',
       phone: '',
-      image_url: '',
-      active: true
+      is_available: true
     });
   };
 
@@ -140,7 +138,7 @@ const ManageDoctorsContent = () => {
     if (!doc) return false;
     
     // Safely handle potentially missing or non-string properties
-    const docName = String(doc.name || '').toLowerCase();
+    const docName = String(doc.full_name || '').toLowerCase();
     const search = String(searchTerm || '').toLowerCase();
     
     const matchesSearch = docName.includes(search);
@@ -205,7 +203,7 @@ const ManageDoctorsContent = () => {
                           </div>
                        </div>
                        
-                       <h3 className="font-bold text-gray-900 truncate" title={doctor.name}>{doctor.name || "Unknown Name"}</h3>
+                       <h3 className="font-bold text-gray-900 truncate" title={doctor.full_name}>{doctor.full_name || "Unknown Name"}</h3>
                        <p className="text-sm text-[#1FAA59] font-medium mb-2">{doctor.specialty || "General"}</p>
                        
                        <div className="space-y-1 text-sm text-gray-500 mb-4">
@@ -217,7 +215,7 @@ const ManageDoctorsContent = () => {
                           <div className="flex items-center gap-1 text-yellow-600 text-xs font-bold">
                              <Star className="w-3 h-3 fill-current" /> {doctor.rating || "5.0"}
                           </div>
-                          <div className="font-bold text-gray-900">₹{doctor.consultation_fee || 0}</div>
+                          <div className="font-bold text-gray-900">₹{doctor.fee || 0}</div>
                        </div>
                     </div>
                  </Card>
@@ -234,7 +232,7 @@ const ManageDoctorsContent = () => {
               <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4 mt-4">
                  <div className="space-y-2">
                     <label className="text-sm font-medium">Full Name</label>
-                    <Input name="name" value={formData.name} onChange={handleInputChange} required />
+                    <Input name="full_name" value={formData.full_name || ''} onChange={handleInputChange} required />
                  </div>
                  <div className="space-y-2">
                     <label className="text-sm font-medium">Specialty</label>
@@ -255,7 +253,7 @@ const ManageDoctorsContent = () => {
                  </div>
                  <div className="space-y-2">
                     <label className="text-sm font-medium">Fee (₹)</label>
-                    <Input name="consultation_fee" type="number" value={formData.consultation_fee} onChange={handleInputChange} required />
+                    <Input name="fee" type="number" value={formData.fee || ''} onChange={handleInputChange} required />
                  </div>
                  <div className="space-y-2">
                     <label className="text-sm font-medium">Email</label>
@@ -267,7 +265,7 @@ const ManageDoctorsContent = () => {
                  </div>
                  <div className="col-span-2 space-y-2">
                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="active" checked={formData.active} onChange={handleInputChange} className="w-4 h-4 text-[#1FAA59] rounded" />
+                        <input type="checkbox" name="is_available" checked={formData.is_available || false} onChange={handleInputChange} className="w-4 h-4 text-[#1FAA59] rounded" />
                         <span className="text-sm font-medium">Available for Booking</span>
                      </label>
                  </div>
