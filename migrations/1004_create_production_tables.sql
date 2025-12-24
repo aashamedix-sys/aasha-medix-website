@@ -118,6 +118,12 @@ CREATE TABLE IF NOT EXISTS public.bookings (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Backfill compatibility: ensure booking columns exist if table already existed
+ALTER TABLE public.bookings
+    ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending';
+ALTER TABLE public.bookings
+    ADD COLUMN IF NOT EXISTS booking_status TEXT DEFAULT 'pending';
+
 -- Add indexes
 CREATE INDEX IF NOT EXISTS idx_bookings_patient ON public.bookings(patient_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings(booking_status);
@@ -143,6 +149,12 @@ CREATE TABLE IF NOT EXISTS public.doctor_bookings (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Backfill compatibility: ensure doctor_bookings columns exist if table already existed
+ALTER TABLE public.doctor_bookings
+    ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+ALTER TABLE public.doctor_bookings
+    ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending';
+
 -- Add indexes
 CREATE INDEX IF NOT EXISTS idx_doctor_bookings_patient ON public.doctor_bookings(patient_id);
 CREATE INDEX IF NOT EXISTS idx_doctor_bookings_doctor ON public.doctor_bookings(doctor_id);
@@ -165,6 +177,10 @@ CREATE TABLE IF NOT EXISTS public.leads (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Backfill compatibility: ensure leads.status exists if table already existed
+ALTER TABLE public.leads
+    ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'new';
 
 -- Add indexes
 CREATE INDEX IF NOT EXISTS idx_leads_status ON public.leads(status);
@@ -201,6 +217,10 @@ CREATE TABLE IF NOT EXISTS public.reports (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Backfill compatibility: ensure reports.status exists if table already existed
+ALTER TABLE public.reports
+    ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
 
 -- Add indexes
 CREATE INDEX IF NOT EXISTS idx_reports_patient ON public.reports(patient_id);
